@@ -26,8 +26,8 @@ class Bot(commands.Bot):
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
-        if ctx.author.name == "vanidor":
-            await ctx.send(f'pong {ctx.author.name}!')
+        log.debug(f"ping from '{ctx.author.display_name}'")
+        await ctx.send(f'pong {ctx.author.name}!')
     
     @commands.command()
     async def stop(self, ctx: commands.Context):
