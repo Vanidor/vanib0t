@@ -1,19 +1,41 @@
 import logging as log
 import bot
+import sys
+import getopt
 
 logFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 log.basicConfig(
     filename='py.log',
-    level=log.DEBUG,
+    level=log.INFO,
     format=logFormat
 )
 
+opts, args = getopt.getopt(sys.argv[1:], "t:p:", ["token=", "prefix="])
+
 token = ""
-prefix = "?"
+prefix = ""
+
+for opt, arg in opts:
+    if opt == '--token':
+        log.info("Token: " + arg)
+        token = arg
+    elif opt == '--prefix':
+        log.info("Prefix: " + arg)
+        prefix = arg
+
+if token == "":
+    log.error("Token can't be empty!")
+    raise Exception
+
+if prefix == "":
+    log.error("Prefix can't be empty!")
+    raise Exception
+
+
 channels = [
     "vanidor",
-    "cisco_04"
+    "vanib0t"
 ]
 AdminUsers=[
     "vanidor"
