@@ -17,10 +17,12 @@ class Bot(commands.Bot):
         self.admin_users = admin_users
 
     async def event_ready(self):
+        ''' Specifies that the bot is ready '''
         log.info('Logged in as %s', self.nick)
         log.info('User id is %s', self.user_id)
 
     async def event_message(self, message):
+        ''' Gets called every time a new message is send in the joined channels '''
         if message.echo:
             return
 
