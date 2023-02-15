@@ -5,16 +5,16 @@ import getopt
 
 logFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
-logLevel = log.DEBUG
+LOGLEVEL = log.DEBUG
 
 log.basicConfig(
     filename='py.log',
-    level=logLevel,
+    level=LOGLEVEL,
     format=logFormat
 )
 
 console = log.StreamHandler()
-console.setLevel(logLevel)
+console.setLevel(LOGLEVEL)
 log.getLogger('').addHandler(console)
 
 opts, args = getopt.getopt(sys.argv[1:], "t:p:", ["token=", "prefix="])
