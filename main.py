@@ -3,14 +3,14 @@ import sys
 import getopt
 import bot
 
-logFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+LOGFORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 LOGLEVEL = log.DEBUG
 
 log.basicConfig(
     filename='py.log',
     level=LOGLEVEL,
-    format=logFormat
+    format=LOGFORMAT
 )
 
 console = log.StreamHandler()
@@ -19,22 +19,22 @@ log.getLogger('').addHandler(console)
 
 opts, args = getopt.getopt(sys.argv[1:], "t:p:", ["token=", "prefix="])
 
-token = ""
-prefix = ""
+TOKEN = ""
+PREFIX = ""
 
 for opt, arg in opts:
     if opt == '--token':
-        log.info("Token: " + arg)
-        token = arg
+        log.info("Token: %s", arg)
+        TOKEN = arg
     elif opt == '--prefix':
-        log.info("Prefix: " + arg)
-        prefix = arg
+        log.info("Prefix: %s", arg)
+        PREFIX = arg
 
-if token == "":
+if TOKEN == "":
     log.error("Token can't be empty!")
     raise Exception
 
-if prefix == "":
+if PREFIX == "":
     log.error("Prefix can't be empty!")
     raise Exception
 
@@ -46,21 +46,22 @@ channels = [
 AdminUsers=[
     "vanidor"
 ]
-log.info(f"Creating bot with token '{token}' and prefix '{prefix}' for channel channels '{channels}'")
+log.info(
+    "Creating bot with token '%s' and prefix '%s' for channel channels '%s'", 
+    TOKEN, PREFIX, channels)
 
 bot = bot.Bot(
-    token=token,
-    prefix=prefix,
+    token=TOKEN,
+    prefix=PREFIX,
     channels=channels
 )
-log.info(f"Admin users: {AdminUsers}")
 bot.SetAdminUsers(
     AdminUsers=AdminUsers
 )
-log.info(f"Created bot, starting mainloop")
+log.info("Created bot, starting mainloop")
 
 try:
     bot.run()
 except Exception as e:
-    log.error(f"Error in bot mainloop. Type: {type(e)}")
-    log.error(f"Stacktrace: {e}")
+    log.error("Error in bot mainloop. Type: %s", type(e))
+    log.error("Stacktrace: %s", e)
