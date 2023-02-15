@@ -1,7 +1,7 @@
 import logging as log
-import bot
 import sys
 import getopt
+import bot
 
 logFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
