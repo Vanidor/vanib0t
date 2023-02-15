@@ -62,5 +62,5 @@ log.info(f"Created bot, starting mainloop")
 try:
     bot.run()
 except Exception as e:
-      log.error(f"Error in bot mainloop. Type: {type(e)}")
-      log.error(f"Stacktrace: {e}")
+    log.error(f"Error in bot mainloop. Type: {type(e)}")
+    log.error(f"Stacktrace: {e}")
