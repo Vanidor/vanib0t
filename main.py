@@ -55,7 +55,7 @@ bot = bot.Bot(
     prefix=PREFIX,
     channels=channels
 )
-bot.SetAdminUsers(
+bot.set_admin_users(
     AdminUsers=AdminUsers
 )
 log.info("Created bot, starting mainloop")
