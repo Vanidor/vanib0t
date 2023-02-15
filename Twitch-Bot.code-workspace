@@ -6,6 +6,8 @@
 	],
 	"settings": {},
 	"extensions": {
-		"recommendations": ["ms-python.python"]
+		"recommendations": [
+			"ms-python.python",
+			"ms-python.pylint"]
 	}
 }
