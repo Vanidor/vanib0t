@@ -1,3 +1,4 @@
+''' Logging library for logging '''
 import logging as log
 import sys
 import getopt
@@ -32,11 +33,11 @@ for opt, arg in opts:
 
 if TOKEN == "":
     log.error("Token can't be empty!")
-    raise Exception
+    raise AttributeError
 
 if PREFIX == "":
     log.error("Prefix can't be empty!")
-    raise Exception
+    raise AttributeError
 
 
 channels = [
@@ -56,12 +57,12 @@ bot = bot.Bot(
     channels=channels
 )
 bot.set_admin_users(
-    AdminUsers=AdminUsers
+    admin_users=AdminUsers
 )
 log.info("Created bot, starting mainloop")
 
 try:
     bot.run()
-except Exception as e:
+except (Exception) as e: # pylint: disable=broad-except
     log.error("Error in bot mainloop. Type: %s", type(e))
     log.error("Stacktrace: %s", e)
