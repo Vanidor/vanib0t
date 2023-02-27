@@ -1,5 +1,7 @@
 ''' Logging library for logging '''
 import logging as log
+import regex
+import requests
 from twitchio.ext import commands
 
 class Bot(commands.Bot):
@@ -32,6 +34,30 @@ class Bot(commands.Bot):
                     message.author.display_name)
 
         await self.handle_commands(message)
+
+    @commands.command()
+    async def chatgpt(self, ctx: commands.Context):
+        url = "https://vanidor-twitch.azurewebsites.net/api/chatgpt"
+        prompt = "Create a short answer that you could find in twitch chat to the following prompt: "
+        clean_text = ctx.message.content.replace('?chatgpt ', '')
+        text_param = prompt + clean_text
+        log.info("Input: %s", clean_text)
+        log.info("Combined prompt: %s", text_param)
+        params = {
+            "text": text_param
+        }
+        headers = {
+            "x-fossabot-channellogin": "vanidor"
+        }
+        result = requests.get(
+            url=url,
+            params=params,
+            headers=headers,
+            timeout=10)
+        result_text = result.text
+        fixed_result_text = regex.sub(r'\p{C}', '', result_text)
+        log.info("Result: %s", fixed_result_text)
+        await ctx.reply(fixed_result_text)
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
