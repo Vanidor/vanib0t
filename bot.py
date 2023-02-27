@@ -49,11 +49,14 @@ class Bot(commands.Bot):
         headers = {
             "x-fossabot-channellogin": "vanidor"
         }
-        result = requests.get(
-            url=url,
-            params=params,
-            headers=headers,
-            timeout=10)
+        try:
+            result = requests.get(
+                url=url,
+                params=params,
+                headers=headers,
+                timeout=10)
+        except TimeoutError():
+            await ctx.reply("Timeout while trying to get an aswer Sadge")
         result_text = result.text
         fixed_result_text = regex.sub(r'\p{C}', '', result_text)
         log.info("Result: %s", fixed_result_text)
