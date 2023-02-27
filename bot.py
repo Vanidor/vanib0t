@@ -3,6 +3,7 @@ import logging as log
 import regex
 import requests
 from twitchio.ext import commands
+from twitchio import message as msg
 
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
@@ -23,23 +24,27 @@ class Bot(commands.Bot):
         log.info('Logged in as %s', self.nick)
         log.info('User id is %s', self.user_id)
 
-    async def event_message(self, message):
+    async def event_message(self, message: msg):
         ''' Gets called every time a new message is send in the joined channels '''
         if message.echo:
             return
 
+        substring_text = "@" + self.nick
+
         log.debug("Got message '%s' in '%s' by '%s'",
-                    message.content,
-                    message.channel.name,
-                    message.author.display_name)
+            message.content,
+            message.channel.name,
+            message.author.display_name)
+
+        if substring_text in message.content:
+            await self.chatgpt_message(message.channel, message.content)
 
         await self.handle_commands(message)
 
-    @commands.command()
-    async def chatgpt(self, ctx: commands.Context):
+    async def chatgpt_message(self, ctx, message: str):
         url = "https://vanidor-twitch.azurewebsites.net/api/chatgpt"
         prompt = "Create a short answer that you could find in twitch chat to the following prompt: "
-        clean_text = ctx.message.content.replace('?chatgpt ', '')
+        clean_text = message.replace('?chatgpt ', '')
         text_param = prompt + clean_text
         log.info("Input: %s", clean_text)
         log.info("Combined prompt: %s", text_param)
@@ -56,11 +61,11 @@ class Bot(commands.Bot):
                 headers=headers,
                 timeout=10)
         except TimeoutError():
-            await ctx.reply("Timeout while trying to get an aswer Sadge")
+            await ctx.send("Timeout while trying to get an aswer Sadge")
         result_text = result.text
         fixed_result_text = regex.sub(r'\p{C}', '', result_text)
         log.info("Result: %s", fixed_result_text)
-        await ctx.reply(fixed_result_text)
+        await ctx.send(fixed_result_text)
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
