@@ -30,13 +30,15 @@ class Bot(commands.Bot):
             return
 
         substring_text = "@" + self.nick
+        substring_text = self.nick
+
 
         log.debug("Got message '%s' in '%s' by '%s'",
             message.content,
             message.channel.name,
             message.author.display_name)
 
-        if substring_text in message.content:
+        if substring_text.upper() in message.content.upper():
             await self.chatgpt_message(message.channel, message.content)
 
         await self.handle_commands(message)
@@ -45,6 +47,7 @@ class Bot(commands.Bot):
         url = "https://vanidor-twitch.azurewebsites.net/api/chatgpt"
         prompt = "Create a short answer that you could find in twitch chat to the following prompt: "
         clean_text = message.replace('?chatgpt ', '')
+        clean_text = message.replace(self.nick, '')
         text_param = prompt + clean_text
         log.info("Input: %s", clean_text)
         log.info("Combined prompt: %s", text_param)
@@ -60,8 +63,11 @@ class Bot(commands.Bot):
                 params=params,
                 headers=headers,
                 timeout=10)
-        except TimeoutError():
+        except (Exception) as e:  # pylint: disable=broad-except
+            log.warn("Error: %s", type(e))
+            log.warn("Stacktrace: %s", e)
             await ctx.send("Timeout while trying to get an aswer Sadge")
+
         result_text = result.text
         fixed_result_text = regex.sub(r'\p{C}', '', result_text)
         log.info("Result: %s", fixed_result_text)
