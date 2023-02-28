@@ -5,8 +5,10 @@ import requests
 from twitchio.ext import commands
 from twitchio import message as msg
 
+
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
+
     def __init__(self, token: str, prefix: str, channels: list[str]):
         self.admin_users = ""
         super().__init__(
@@ -29,30 +31,30 @@ class Bot(commands.Bot):
         if message.echo:
             return
 
-        substring_text = "@" + self.nick
+        # substring_text = "@" + self.nick
         substring_text = self.nick
 
-
         log.debug("Got message '%s' in '%s' by '%s'",
-            message.content,
-            message.channel.name,
-            message.author.display_name)
+                  message.content,
+                  message.channel.name,
+                  message.author.display_name)
 
-        if substring_text.upper() in message.content.upper():
-            await self.chatgpt_message(message.channel, message.content)
+        if (substring_text.upper() in message.content.upper()) and (not "reply-parent-display-name" in message.tags):
+            log.info("Got chatgpt prompt '%s' in '%s' by '%s'",
+                     message.content,
+                     message.channel.name,
+                     message.author.display_name)
+            prompt = f"You are a bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'. Create a short answer that you could find in twitch chat to the following prompt that has been send by {message.author.display_name}: {message.content}"
+            answer = await self.chatgpt_message(message.channel, prompt)
+            await message.channel.send(answer)
 
         await self.handle_commands(message)
 
-    async def chatgpt_message(self, ctx, message: str):
+    async def chatgpt_message(self, ctx, prompt: str):
+        ''' Function to generate a chatgpt message '''
         url = "https://vanidor-twitch.azurewebsites.net/api/chatgpt"
-        prompt = "Create a short answer that you could find in twitch chat to the following prompt: "
-        clean_text = message.replace('?chatgpt ', '')
-        clean_text = message.replace(self.nick, '')
-        text_param = prompt + clean_text
-        log.info("Input: %s", clean_text)
-        log.info("Combined prompt: %s", text_param)
         params = {
-            "text": text_param
+            "text": prompt
         }
         headers = {
             "x-fossabot-channellogin": "vanidor"
@@ -63,22 +65,23 @@ class Bot(commands.Bot):
                 params=params,
                 headers=headers,
                 timeout=10)
-        except (Exception) as e:  # pylint: disable=broad-except
-            log.warn("Error: %s", type(e))
-            log.warn("Stacktrace: %s", e)
+        except (Exception) as exception:  # pylint: disable=broad-except
+            log.warning("Error: %s", type(exception))
+            log.warning("Stacktrace: %s", exception)
             await ctx.send("Timeout while trying to get an aswer Sadge")
 
         result_text = result.text
         fixed_result_text = regex.sub(r'\p{C}', '', result_text)
-        log.info("Result: %s", fixed_result_text)
-        await ctx.send(fixed_result_text)
+        # log.info("Result: %s", fixed_result_text)
+        return fixed_result_text
+        # await ctx.send(fixed_result_text)
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
-        ''' Command for sending a ping message ''' 
+        ''' Command for sending a ping message '''
         log.debug("ping from '%s' in '%s'",
-                    ctx.author.display_name,
-                    ctx.channel.name)
+                  ctx.author.display_name,
+                  ctx.channel.name)
         await ctx.send(f'pong {ctx.author.name}!')
 
     @commands.command()
