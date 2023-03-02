@@ -1,9 +1,10 @@
 ''' Logging library for logging '''
 import logging as log
-import regex
-import requests
+import time
 from twitchio.ext import commands
 from twitchio import message as msg
+import OpenaiHelper
+import helper_functions
 
 
 class Bot(commands.Bot):
@@ -11,6 +12,8 @@ class Bot(commands.Bot):
 
     def __init__(self, token: str, prefix: str, channels: list[str]):
         self.admin_users = ""
+        self.global_cd = dict()
+        self.user_pronouns = dict()
         super().__init__(
             token=token,
             prefix=prefix,
@@ -44,37 +47,60 @@ class Bot(commands.Bot):
                      message.content,
                      message.channel.name,
                      message.author.display_name)
-            prompt = f"You are a bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'. Create a short answer that you could find in twitch chat to the following prompt that has been send by {message.author.display_name}: {message.content}"
-            answer = await self.chatgpt_message(message.channel, prompt)
-            await message.channel.send(answer)
+            do_answer = True
+            if "chatgpt-" + message.channel.name in self.global_cd:
+                old_time = self.global_cd["chatgpt-" + message.channel.name]
+                new_time = time.time()
+                if message.channel.name == self.nick:
+                    global_cooldown = 0
+                else:
+                    global_cooldown = 15
+                difference = new_time - old_time
+                remaining = global_cooldown - difference
+
+                if difference >= global_cooldown:
+                    do_answer = True
+                else:
+                    log.info(
+                        "Global cooldown. Time since last message %i. Cooldown remaining %i",
+                        difference,
+                        remaining)
+                    do_answer = False
+
+            if do_answer:
+                username = message.author.name
+                if username in self.user_pronouns:
+                    log.info("Got saved pronouns for %s: %s",
+                             username, self.user_pronouns[username])
+                    pronouns = self.user_pronouns[username]
+                else:
+                    pronouns = helper_functions.get_user_pronoun(username)
+                    self.user_pronouns[username] = pronouns
+                    log.info("Saved pronouns for %s: %s",
+                             username, self.user_pronouns[username])
+
+                system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'."
+                system += "Create short answers that you could find in a twitch chat."
+                system += f"The prompt has been send by {username}"
+                if pronouns is not None:
+                    system += f", according to our records the user goes by the pronouns {pronouns}, "
+                system += "as a mesage in the twitch chat."
+
+                # log.info("System message: %s", system)
+                openai = OpenaiHelper.OpenaiHelper()
+                answer = openai.get_chat_completion(
+                    system,
+                    message.content,
+                    username)
+                log.info("Answer for chatgpt prompt '%s' in '%s' by '%s': '%s'",
+                         message.content,
+                         message.channel.name,
+                         username,
+                         answer)
+                self.global_cd["chatgpt-" + message.channel.name] = time.time()
+                await message.channel.send(answer)
 
         await self.handle_commands(message)
-
-    async def chatgpt_message(self, ctx, prompt: str):
-        ''' Function to generate a chatgpt message '''
-        url = "https://vanidor-twitch.azurewebsites.net/api/chatgpt"
-        params = {
-            "text": prompt
-        }
-        headers = {
-            "x-fossabot-channellogin": "vanidor"
-        }
-        try:
-            result = requests.get(
-                url=url,
-                params=params,
-                headers=headers,
-                timeout=10)
-        except (Exception) as exception:  # pylint: disable=broad-except
-            log.warning("Error: %s", type(exception))
-            log.warning("Stacktrace: %s", exception)
-            await ctx.send("Timeout while trying to get an aswer Sadge")
-
-        result_text = result.text
-        fixed_result_text = regex.sub(r'\p{C}', '', result_text)
-        # log.info("Result: %s", fixed_result_text)
-        return fixed_result_text
-        # await ctx.send(fixed_result_text)
 
     @commands.command()
     async def ping(self, ctx: commands.Context):
