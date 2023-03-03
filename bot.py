@@ -88,7 +88,7 @@ class Bot(commands.Bot):
                 system += "as a mesage in the twitch chat."
 
                 # log.info("System message: %s", system)
-                openai = OpenaiHelper.OpenaiHelper()
+                openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
                 answer = openai.get_chat_completion(
                     system,
                     message.content,
