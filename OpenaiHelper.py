@@ -34,11 +34,12 @@ class OpenaiHelper:
                 frequency_penalty=0,
                 user=username
             )
-        except (Exception) as e:  # pylint: disable=broad-except
-            log.error("Error while contacting chat completion api. Type: %s", type(e))
-            # log.error("Stacktrace: %s", e)
+        except (Exception) as exc:  # pylint: disable=broad-except
+            log.error(
+                "Error while contacting chat completion api. Type: %s", type(exc))
+            # log.error("Stacktrace: %s", exc)
             return "Sorry I wasn't able to get an answer to your request Sadge"
-        
+
         result = completion.choices[0].message.content
         log.debug('ChatCompletion output: %s', str(completion))
 
@@ -47,9 +48,10 @@ class OpenaiHelper:
                 input=result,
                 model="text-moderation-latest"
             )
-        except (Exception) as e:  # pylint: disable=broad-except
-            log.error("Error while contacting moderation API. Type: %s", type(e))
-            # log.error("Stacktrace: %s", e)
+        except (Exception) as exc:  # pylint: disable=broad-except
+            log.error(
+                "Error while contacting moderation API. Type: %s", type(exc))
+            # log.error("Stacktrace: %s", exc)
             return "Sorry I wasn't able to get an answer to your request Sadge"
         moderation_output = moderation["results"][0]
 
