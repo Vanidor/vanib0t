@@ -112,6 +112,26 @@ class Bot(commands.Bot):
         await ctx.send(f'pong {ctx.author.name}!')
 
     @commands.command()
+    async def join(self, ctx: commands.Context):
+        ''' Command for joining the bot '''
+        if ctx.author.name in self.admin_users:
+            command_name = f"{ctx.prefix}join "
+            channel_name = ctx.message.content.replace(command_name, '')
+            await ctx.send(f'Joining channel {channel_name}')
+            log.info('Joining channel %s', channel_name)
+            await self.join_channels(channels=[channel_name])
+
+    @commands.command()
+    async def leave(self, ctx: commands.Context):
+        ''' Command for leaving the bot '''
+        if ctx.author.name in self.admin_users:
+            command_name = f"{ctx.prefix}leave "
+            channel_name = ctx.message.content.replace(command_name, '')
+            await ctx.send(f'Leaving channel {channel_name}')
+            log.info('Leaving channel %s', channel_name)
+            await self.part_channels(channels=[channel_name])
+
+    @commands.command()
     async def stop(self, ctx: commands.Context):
         ''' Command for stopping the bot '''
         if ctx.author.name in self.admin_users:
