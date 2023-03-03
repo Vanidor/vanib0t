@@ -10,8 +10,9 @@ import helper_functions
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
 
-    def __init__(self, token: str, prefix: str, channels: list[str]):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str):
         self.admin_users = ""
+        self.openai_api_key = openai_api_key
         self.global_cd = dict()
         self.user_pronouns = dict()
         super().__init__(

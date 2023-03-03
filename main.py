@@ -19,6 +19,11 @@ parser.add_argument(
     help='The prefix of the bot.'
 )
 parser.add_argument(
+    '--openai_api_key',
+    required=True,
+    help='The API key for OpenAI'
+)
+parser.add_argument(
     '--loglevel',
     default=log.INFO,
     choices=log._nameToLevel.keys()  # pylint: disable=W0212
@@ -29,8 +34,9 @@ args = parser.parse_args()
 TOKEN = args.token
 PREFIX = args.prefix
 LOGLEVEL = args.loglevel
+OPENAI_API_KEY = args.openai_api_key
 
-print(f"Token: {TOKEN}\r\nPREFIX: {PREFIX}\r\nLOGLEVEL: {LOGLEVEL}")
+print(f"Token: {TOKEN}\r\nPREFIX: {PREFIX}\r\nLOGLEVEL: {LOGLEVEL}\r\nOPENAI_API_KEY: {OPENAI_API_KEY}")
 
 log.basicConfig(
     filename='py.log',
@@ -56,7 +62,8 @@ log.info(
 bot = bot.Bot(
     token=TOKEN,
     prefix=PREFIX,
-    channels=channels
+    channels=channels,
+    openai_api_key=OPENAI_API_KEY
 )
 bot.set_admin_users(
     admin_users=AdminUsers
