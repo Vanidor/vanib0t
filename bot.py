@@ -30,6 +30,8 @@ class Bot(commands.Bot):
         log.info('Logged in as %s', self.nick)
         log.info('User id is %s', self.user_id)
 
+    # async def event_channel_joined(self, channel):
+
     async def event_message(self, message: msg):
         ''' Gets called every time a new message is send in the joined channels '''
         if message.echo:
@@ -55,7 +57,7 @@ class Bot(commands.Bot):
                 if message.channel.name == self.nick:
                     global_cooldown = 0
                 else:
-                    global_cooldown = 15
+                    global_cooldown = 30
                 difference = new_time - old_time
                 remaining = global_cooldown - difference
 
@@ -80,12 +82,12 @@ class Bot(commands.Bot):
                     log.info("Saved pronouns for %s: %s",
                              username, self.user_pronouns[username])
                 pronouns = None
-                system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'."
-                system += "Create short answers that you could find in a twitch chat."
+                system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'. "
+                system += "Create short answers that you could find in a twitch chat. Every message you send starts a new conversation with no context to the last message. "
                 system += f"The prompt has been send by '{username}' "
                 if pronouns is not None:
                     system += f", according to our records the user goes by the pronouns '{pronouns}', "
-                system += "as a mesage in the twitch chat."
+                system += "as a mesage in the twitch chat. "
 
                 # log.info("System message: %s", system)
                 openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
@@ -114,7 +116,7 @@ class Bot(commands.Bot):
     @commands.command()
     async def join(self, ctx: commands.Context):
         ''' Command for joining the bot '''
-        if ctx.author.name in self.admin_users:
+        if (ctx.author.name in self.admin_users) and (ctx.channel.name == self.nick):
             command_name = f"{ctx.prefix}join "
             channel_name = ctx.message.content.replace(command_name, '')
             await ctx.send(f'Joining channel {channel_name}')
@@ -122,13 +124,13 @@ class Bot(commands.Bot):
             await self.join_channels(channels=[channel_name])
 
     @commands.command()
-    async def leave(self, ctx: commands.Context):
+    async def part(self, ctx: commands.Context):
         ''' Command for leaving the bot '''
-        if ctx.author.name in self.admin_users:
-            command_name = f"{ctx.prefix}leave "
+        if (ctx.author.name in self.admin_users) and (ctx.channel.name == self.nick):
+            command_name = f"{ctx.prefix}part "
             channel_name = ctx.message.content.replace(command_name, '')
-            await ctx.send(f'Leaving channel {channel_name}')
-            log.info('Leaving channel %s', channel_name)
+            await ctx.send(f'Parting channel {channel_name}')
+            log.info('Parting channel %s', channel_name)
             await self.part_channels(channels=[channel_name])
 
     @commands.command()
