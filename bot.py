@@ -78,12 +78,12 @@ class Bot(commands.Bot):
                     self.user_pronouns[username] = pronouns
                     log.info("Saved pronouns for %s: %s",
                              username, self.user_pronouns[username])
-
+                pronouns = None
                 system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'."
                 system += "Create short answers that you could find in a twitch chat."
-                system += f"The prompt has been send by {username}"
+                system += f"The prompt has been send by '{username}' "
                 if pronouns is not None:
-                    system += f", according to our records the user goes by the pronouns {pronouns}, "
+                    system += f", according to our records the user goes by the pronouns '{pronouns}', "
                 system += "as a mesage in the twitch chat."
 
                 # log.info("System message: %s", system)
