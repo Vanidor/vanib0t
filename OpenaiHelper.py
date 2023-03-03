@@ -5,39 +5,52 @@ import openai
 class OpenaiHelper:
     ''' Openai helper class '''
 
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+
     def get_chat_completion(self, system: str, user: str, username: str):
         ''' Get chat completion - https://platform.openai.com/docs/guides/chat/introduction '''
-        openai.api_key = "sk-..."
+        openai.api_key = self.api_key
         log.debug("System: %s", system)
         log.debug("User: %s", user)
-        completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": system
-                },
-                {
-                    "role": "user",
-                    "content": user
-                }
-            ],
-            temperature=1,
-            top_p=1,
-            n=1,
-            max_tokens=100,
-            presence_penalty=0,
-            frequency_penalty=0,
-            user=username
-        )
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system
+                    },
+                    {
+                        "role": "user",
+                        "content": user
+                    }
+                ],
+                temperature=1,
+                top_p=1,
+                n=1,
+                max_tokens=100,
+                presence_penalty=0,
+                frequency_penalty=0,
+                user=username
+            )
+        except (Exception) as e:  # pylint: disable=broad-except
+            log.error("Error while contacting chat completion api. Type: %s", type(e))
+            # log.error("Stacktrace: %s", e)
+            return "Sorry I wasn't able to get an answer to your request Sadge"
+        
         result = completion.choices[0].message.content
         log.debug('ChatCompletion output: %s', str(completion))
 
-        moderation = openai.Moderation.create(
-            input=result,
-            model="text-moderation-latest"
-        )
-
+        try:
+            moderation = openai.Moderation.create(
+                input=result,
+                model="text-moderation-latest"
+            )
+        except (Exception) as e:  # pylint: disable=broad-except
+            log.error("Error while contacting moderation API. Type: %s", type(e))
+            # log.error("Stacktrace: %s", e)
+            return "Sorry I wasn't able to get an answer to your request Sadge"
         moderation_output = moderation["results"][0]
 
         log.debug('Moderation output: %s', str(moderation_output))

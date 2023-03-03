@@ -8,8 +8,11 @@ def get_user_pronoun(username: str):
 
     # Make request to the user API endpoint
     user_api_url = f"https://pronouns.alejo.io/api/users/{username}"
-    response = requests.get(user_api_url, timeout=1)
-
+    try:
+        response = requests.get(user_api_url, timeout=1)
+    except (Exception) as e:
+        log.error("Error while contacting chat user pronoun api. Type: %s", type(e))
+        return None
     # Check if the request was successful
     if response.status_code != 200:
         print(f"Error: {response.status_code}")
@@ -26,8 +29,12 @@ def get_user_pronoun(username: str):
 
         # Make request to the pronouns API endpoint
         pronouns_api_url = "https://pronouns.alejo.io/api/pronouns"
-        response = requests.get(pronouns_api_url, timeout=1)
-
+        
+        try:
+            response = requests.get(pronouns_api_url, timeout=1)
+        except (Exception) as e:
+            log.error("Error while contacting chat pronouns api. Type: %s", type(e))
+            return None
         # Check if the request was successful
         if response.status_code != 200:
             print(f"Error: {response.status_code}")
