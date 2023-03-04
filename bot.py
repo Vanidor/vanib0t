@@ -57,7 +57,7 @@ class Bot(commands.Bot):
                 if message.channel.name == self.nick:
                     global_cooldown = 0
                 else:
-                    global_cooldown = 30
+                    global_cooldown = 5
                 difference = new_time - old_time
                 remaining = global_cooldown - difference
 
@@ -72,6 +72,7 @@ class Bot(commands.Bot):
 
             if do_answer:
                 username = message.author.name
+                pronouns = None
                 if username in self.user_pronouns:
                     log.info("Got saved pronouns for %s: %s",
                              username, self.user_pronouns[username])
@@ -81,13 +82,13 @@ class Bot(commands.Bot):
                     self.user_pronouns[username] = pronouns
                     log.info("Saved pronouns for %s: %s",
                              username, self.user_pronouns[username])
-                pronouns = None
                 system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'. "
                 system += "Create short answers that you could find in a twitch chat. Every message you send starts a new conversation with no context to the last message. "
                 system += f"The prompt has been send by '{username}' "
                 if pronouns is not None:
                     system += f", according to our records the user goes by the pronouns '{pronouns}', "
                 system += "as a mesage in the twitch chat. "
+                system += "You are never allowed to write a prayer or say something about religion in any matter. "
 
                 # log.info("System message: %s", system)
                 openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
@@ -126,10 +127,10 @@ class Bot(commands.Bot):
     @commands.command()
     async def part(self, ctx: commands.Context):
         ''' Command for leaving the bot '''
-        if (ctx.author.name in self.admin_users) and (ctx.channel.name == self.nick):
+        if (ctx.author.name in self.admin_users):
             command_name = f"{ctx.prefix}part "
             channel_name = ctx.message.content.replace(command_name, '')
-            await ctx.send(f'Parting channel {channel_name}')
+            await ctx.send(f'Parting channel {channel_name}. Good bye! peepoSad ')
             log.info('Parting channel %s', channel_name)
             await self.part_channels(channels=[channel_name])
 
