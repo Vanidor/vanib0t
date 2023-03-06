@@ -45,68 +45,96 @@ class Bot(commands.Bot):
                   message.channel.name,
                   message.author.display_name)
 
-        if (substring_text.upper() in message.content.upper()) and (not "reply-parent-display-name" in message.tags):
+        if (substring_text.upper() in message.content.upper()):
             log.info("Got chatgpt prompt '%s' in '%s' by '%s'",
                      message.content,
                      message.channel.name,
                      message.author.display_name)
-            do_answer = True
-            if "chatgpt-" + message.channel.name in self.global_cd:
-                old_time = self.global_cd["chatgpt-" + message.channel.name]
-                new_time = time.time()
-                if message.channel.name == self.nick:
-                    global_cooldown = 0
-                else:
-                    global_cooldown = 5
-                difference = new_time - old_time
-                remaining = global_cooldown - difference
-
-                if difference >= global_cooldown:
-                    do_answer = True
-                else:
-                    log.info(
-                        "Global cooldown. Time since last message %i. Cooldown remaining %i",
-                        difference,
-                        remaining)
-                    do_answer = False
-
-            if do_answer:
-                username = message.author.name
-                pronouns = None
-                if username in self.user_pronouns:
-                    log.info("Got saved pronouns for %s: %s",
-                             username, self.user_pronouns[username])
-                    pronouns = self.user_pronouns[username]
-                else:
-                    pronouns = helper_functions.get_user_pronoun(username)
-                    self.user_pronouns[username] = pronouns
-                    log.info("Saved pronouns for %s: %s",
-                             username, self.user_pronouns[username])
-                system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{message.channel.name}'. "
-                system += "Create short answers that you could find in a twitch chat. Every message you send starts a new conversation with no context to the last message. "
-                system += f"The prompt has been send by '{username}' "
-                if pronouns is not None:
-                    system += f", according to our records the user goes by the pronouns '{pronouns}', "
-                system += "as a mesage in the twitch chat. "
-                system += "You are never allowed to write a prayer or say something about religion in any matter. "
-
-                # log.info("System message: %s", system)
-                openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
-                answer = openai.get_chat_completion(
-                    system,
-                    message.content,
-                    username)
-                log.info("Answer for chatgpt prompt '%s' in '%s' by '%s': '%s'",
-                         message.content,
-                         message.channel.name,
-                         username,
-                         answer)
-                self.global_cd["chatgpt-" + message.channel.name] = time.time()
-                await message.channel.send(answer)
+            message.content = f"?chatgpt {message.content}"
 
         await self.handle_commands(message)
 
+    def get_global_cooldown(self, command_name: str, channel_name: str):
+        gcd_name = command_name + "-" + channel_name
+        if gcd_name in self.global_cd:
+            return self.global_cd[gcd_name]
+        else:
+            return None
+
+    def set_global_cooldown(self, command_name: str, channel_name: str):
+        gcd_name = command_name + "-" + channel_name
+        self.global_cd[gcd_name] = time.time()
+
     @commands.command()
+    async def chatgpt(self, ctx: commands.Context):
+        original_message = ctx.message.content[8:]
+        channel_name = ctx.channel.name
+        message_author = ctx.author.name
+        message_tags = ctx.message.tags
+
+        do_answer = True
+
+        old_time = self.get_global_cooldown(
+            "chatgpt", channel_name)
+        if old_time is not None:
+            new_time = time.time()
+            if channel_name == self.nick:
+                global_cooldown = 0
+            else:
+                global_cooldown = 5
+            difference = new_time - old_time
+            remaining = global_cooldown - difference
+
+            if difference >= global_cooldown:
+                do_answer = True
+            else:
+                log.info(
+                    "Global cooldown. Time since last message %i. Cooldown remaining %i",
+                    difference,
+                    remaining)
+                do_answer = False
+        if do_answer:
+            username = message_author
+            if username in self.user_pronouns:
+                log.info("Got saved pronouns for %s: %s",
+                         username, self.user_pronouns[username])
+                pronouns = self.user_pronouns[username]
+            else:
+                pronouns = helper_functions.get_user_pronoun(username)
+                self.user_pronouns[username] = pronouns
+                log.info("Saved pronouns for %s: %s",
+                         username, self.user_pronouns[username])
+
+            system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{channel_name}'. "
+            system += "Create short answers that you could find in a twitch chat. Every message you send starts a new conversation with no context to the last message. "
+            system += f"The prompt has been send by '{username}' "
+            if pronouns is not None:
+                system += f", according to our records the user goes by the pronouns '{pronouns}', "
+            system += "as a mesage in the twitch chat. "
+            system += "You are never allowed to write a prayer or say something about religion in any matter. "
+
+            if "reply-parent-display-name" in message_tags:
+                # TODO: Add more system context (all messages from the thread for example)
+                return None
+
+            log.info("System message: %s", system)
+            openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
+            answer = openai.get_chat_completion(
+                system,
+                original_message,
+                username)
+            log.info("Answer for chatgpt prompt '%s' in '%s' by '%s': '%s'",
+                     original_message,
+                     channel_name,
+                     username,
+                     answer)
+            self.set_global_cooldown(
+                "chatgpt",
+                channel_name
+            )
+            await ctx.reply(answer)
+
+    @ commands.command()
     async def ping(self, ctx: commands.Context):
         ''' Command for sending a ping message '''
         log.debug("ping from '%s' in '%s'",
@@ -114,7 +142,7 @@ class Bot(commands.Bot):
                   ctx.channel.name)
         await ctx.send(f'pong {ctx.author.name}!')
 
-    @commands.command()
+    @ commands.command()
     async def join(self, ctx: commands.Context):
         ''' Command for joining the bot '''
         if (ctx.author.name in self.admin_users) and (ctx.channel.name == self.nick):
@@ -124,7 +152,7 @@ class Bot(commands.Bot):
             log.info('Joining channel %s', channel_name)
             await self.join_channels(channels=[channel_name])
 
-    @commands.command()
+    @ commands.command()
     async def part(self, ctx: commands.Context):
         ''' Command for leaving the bot '''
         if (ctx.author.name in self.admin_users):
@@ -134,7 +162,7 @@ class Bot(commands.Bot):
             log.info('Parting channel %s', channel_name)
             await self.part_channels(channels=[channel_name])
 
-    @commands.command()
+    @ commands.command()
     async def stop(self, ctx: commands.Context):
         ''' Command for stopping the bot '''
         if ctx.author.name in self.admin_users:
