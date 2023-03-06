@@ -65,6 +65,12 @@ class Bot(commands.Bot):
         gcd_name = command_name + "-" + channel_name
         self.global_cd[gcd_name] = time.time()
 
+    def is_message_thread(self, tags):
+        if "reply-parent-display-name" in tags:
+            return True
+        else:
+            return False
+
     @commands.command()
     async def chatgpt(self, ctx: commands.Context):
         original_message = ctx.message.content[8:]
@@ -113,7 +119,7 @@ class Bot(commands.Bot):
             system += "as a mesage in the twitch chat. "
             system += "You are never allowed to write a prayer or say something about religion in any matter. "
 
-            if "reply-parent-display-name" in message_tags:
+            if self.is_message_thread(message_tags):
                 # TODO: Add more system context (all messages from the thread for example)
                 return None
 
