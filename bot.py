@@ -14,7 +14,7 @@ class Bot(commands.Bot):
     def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
-        self.global_cd = dict()
+        self.command_last_used = dict()
         self.user_pronouns = dict()
         super().__init__(
             token=token,
@@ -57,14 +57,14 @@ class Bot(commands.Bot):
 
     def get_global_cooldown(self, command_name: str, channel_name: str):
         gcd_name = command_name + "-" + channel_name
-        if gcd_name in self.global_cd:
-            return self.global_cd[gcd_name]
+        if gcd_name in self.command_last_used:
+            return self.command_last_used[gcd_name]
         else:
             return None
 
     def set_global_cooldown(self, command_name: str, channel_name: str):
         gcd_name = command_name + "-" + channel_name
-        self.global_cd[gcd_name] = time.time()
+        self.command_last_used[gcd_name] = time.time()
 
     def is_message_thread(self, tags):
         if "reply-parent-display-name" in tags:
