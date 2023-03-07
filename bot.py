@@ -15,6 +15,7 @@ class Bot(commands.Bot):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
         self.command_last_used = dict()
+        self.command_global_cd = dict()
         self.user_pronouns = dict()
         super().__init__(
             token=token,
@@ -65,6 +66,17 @@ class Bot(commands.Bot):
     def set_command_last_used(self, command_name: str, channel_name: str):
         gcd_name = command_name + "-" + channel_name
         self.command_last_used[gcd_name] = time.time()
+
+    def get_command_global_cd(self, command_name: str, channel_name: str):
+        gcd_name = command_name + "-" + channel_name
+        if gcd_name in self.command_last_used:
+            return self.command_last_used[gcd_name]
+        else:
+            return None
+
+    def set_command_global_cd(self, command_name: str, channel_name: str):
+        gcd_name = command_name + "-" + channel_name
+        self.command_last_used[gcd_name] = time.time()      
 
     def is_message_thread(self, tags):
         if "reply-parent-display-name" in tags:
