@@ -1,5 +1,6 @@
 import logging as log
 import openai
+import asyncio
 
 
 class OpenaiHelper:
@@ -8,13 +9,13 @@ class OpenaiHelper:
     def __init__(self, api_key: str):
         self.api_key = api_key
 
-    def get_chat_completion(self, system: str, user: str, username: str):
+    async def get_chat_completion(self, system: str, user: str, username: str):
         ''' Get chat completion - https://platform.openai.com/docs/guides/chat/introduction '''
         openai.api_key = self.api_key
         log.debug("System: %s", system)
         log.debug("User: %s", user)
         try:
-            completion = openai.ChatCompletion.create(
+            completion = await openai.ChatCompletion.acreate(
                 model="gpt-3.5-turbo",
                 messages=[
                     {
@@ -44,7 +45,7 @@ class OpenaiHelper:
         log.debug('ChatCompletion output: %s', str(completion))
 
         try:
-            moderation = openai.Moderation.create(
+            moderation = await openai.Moderation.acreate(
                 input=result,
                 model="text-moderation-latest"
             )

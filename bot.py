@@ -5,6 +5,7 @@ from twitchio.ext import commands
 from twitchio import message as msg
 import OpenaiHelper
 import helper_functions
+import asyncio
 
 
 class Bot(commands.Bot):
@@ -125,7 +126,7 @@ class Bot(commands.Bot):
 
             log.info("System message: %s", system)
             openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
-            answer = openai.get_chat_completion(
+            answer = await openai.get_chat_completion(
                 system,
                 original_message,
                 username)
