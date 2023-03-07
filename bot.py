@@ -103,7 +103,7 @@ class Bot(commands.Bot):
             if channel_name == self.nick:
                 global_cooldown = 0
             else:
-                global_cooldown = get_command_global_cd("chatgpt", channel_name)
+                global_cooldown = self.get_command_global_cd("chatgpt", channel_name)
             difference = new_time - old_time
             remaining = global_cooldown - difference
 
