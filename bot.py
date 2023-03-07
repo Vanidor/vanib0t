@@ -32,7 +32,7 @@ class Bot(commands.Bot):
         log.info('Logged in as %s', self.nick)
         log.info('User id is %s', self.user_id)
 
-    async def event_channel_joined(self, channel: Channel):
+    async def event_channel_joined(self, channel):
         channel_name = channel.name
         log.info('Joined %s', channel_name)
         self.set_command_global_cd(self, "chatgpt", channel_name, 15)
