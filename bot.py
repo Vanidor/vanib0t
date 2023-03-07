@@ -35,7 +35,7 @@ class Bot(commands.Bot):
     async def event_channel_joined(self, channel):
         channel_name = channel.name
         log.info('Joined %s', channel_name)
-        self.set_command_global_cd(self, "chatgpt", channel_name, 15)
+        self.set_command_global_cd("chatgpt", channel_name, 15)
 
     async def event_message(self, message: msg):
         ''' Gets called every time a new message is send in the joined channels '''
