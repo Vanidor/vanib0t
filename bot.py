@@ -32,7 +32,10 @@ class Bot(commands.Bot):
         log.info('Logged in as %s', self.nick)
         log.info('User id is %s', self.user_id)
 
-    # async def event_channel_joined(self, channel):
+    async def event_channel_joined(self, channel: Channel):
+        channel_name = channel.name
+        log.info('Joined %s', channel_name)
+        self.set_command_global_cd(self, "chatgpt", channel_name, 15)
 
     async def event_message(self, message: msg):
         ''' Gets called every time a new message is send in the joined channels '''
@@ -69,14 +72,14 @@ class Bot(commands.Bot):
 
     def get_command_global_cd(self, command_name: str, channel_name: str):
         gcd_name = command_name + "-" + channel_name
-        if gcd_name in self.command_last_used:
-            return self.command_last_used[gcd_name]
+        if gcd_name in self.command_global_cd:
+            return self.command_global_cd[gcd_name]
         else:
             return None
 
-    def set_command_global_cd(self, command_name: str, channel_name: str):
+    def set_command_global_cd(self, command_name: str, channel_name: str, cooldown_time: int):
         gcd_name = command_name + "-" + channel_name
-        self.command_last_used[gcd_name] = time.time()      
+        self.command_global_cd[gcd_name] = cooldown_time     
 
     def is_message_thread(self, tags):
         if "reply-parent-display-name" in tags:
@@ -100,7 +103,7 @@ class Bot(commands.Bot):
             if channel_name == self.nick:
                 global_cooldown = 0
             else:
-                global_cooldown = 5
+                global_cooldown = get_command_global_cd("chatgpt", channel_name)
             difference = new_time - old_time
             remaining = global_cooldown - difference
 
