@@ -55,14 +55,14 @@ class Bot(commands.Bot):
 
         await self.handle_commands(message)
 
-    def get_global_cooldown(self, command_name: str, channel_name: str):
+    def get_command_last_used(self, command_name: str, channel_name: str):
         gcd_name = command_name + "-" + channel_name
         if gcd_name in self.command_last_used:
             return self.command_last_used[gcd_name]
         else:
             return None
 
-    def set_global_cooldown(self, command_name: str, channel_name: str):
+    def set_command_last_used(self, command_name: str, channel_name: str):
         gcd_name = command_name + "-" + channel_name
         self.command_last_used[gcd_name] = time.time()
 
@@ -81,7 +81,7 @@ class Bot(commands.Bot):
 
         do_answer = True
 
-        old_time = self.get_global_cooldown(
+        old_time = self.get_command_last_used(
             "chatgpt", channel_name)
         if old_time is not None:
             new_time = time.time()
@@ -135,7 +135,7 @@ class Bot(commands.Bot):
                      channel_name,
                      username,
                      answer)
-            self.set_global_cooldown(
+            self.set_command_last_used(
                 "chatgpt",
                 channel_name
             )
