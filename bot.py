@@ -157,6 +157,22 @@ class Bot(commands.Bot):
             await ctx.reply(answer)
 
     @ commands.command()
+    async def setgcd(self, ctx: commands.Context):
+        ''' Command for setting the global cooldown of commands. Usage: setgcd CommandName Time '''
+        if (ctx.author.name in self.admin_users):
+            command = f"{ctx.prefix}setgcd "
+            args = ctx.message.content.replace(command, '')
+            args = args.split(" ")
+            args_count = len(args)
+            if args_count != 2:
+                await ctx.reply(f'You have to specify 2 arguments. Usage: {ctx.prefix}setgcd CommandName Time. For example {ctx.prefix}setgcd chatgpt 20')
+            else:
+                command_name = args[0]
+                cooldown = args[1]
+                self.set_command_global_cd(command_name, ctx.channel.name, cooldown )
+                await ctx.reply(f'Setting global cooldown of command {command_name} to {cooldown}!')
+
+    @ commands.command()
     async def ping(self, ctx: commands.Context):
         ''' Command for sending a ping message '''
         log.debug("ping from '%s' in '%s'",
