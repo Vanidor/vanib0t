@@ -87,6 +87,25 @@ class Bot(commands.Bot):
         else:
             return False
 
+    def is_command_in_cooldown(self, command_name: str, channel_name: str):
+        ''' Method to return if a given command is on cooldown in a given channel '''
+        old_time = self.get_command_last_used(command_name, channel_name)
+        if old_time is not None:
+            new_time = time.time()
+            if channel_name == self.nick:
+                global_cooldown = 0
+            else:
+                global_cooldown = self.get_command_global_cd(command_name, channel_name)
+            difference = new_time - old_time
+            remaining = global_cooldown - difference
+
+            if difference >= global_cooldown:
+                return True
+            else:
+                return False
+        else:
+            return False
+
     @commands.command()
     async def chatgpt(self, ctx: commands.Context):
         original_message = ctx.message.content[8:]
@@ -95,26 +114,9 @@ class Bot(commands.Bot):
         message_tags = ctx.message.tags
 
         do_answer = True
-
-        old_time = self.get_command_last_used(
-            "chatgpt", channel_name)
-        if old_time is not None:
-            new_time = time.time()
-            if channel_name == self.nick:
-                global_cooldown = 0
-            else:
-                global_cooldown = self.get_command_global_cd("chatgpt", channel_name)
-            difference = new_time - old_time
-            remaining = global_cooldown - difference
-
-            if difference >= global_cooldown:
-                do_answer = True
-            else:
-                log.info(
-                    "Global cooldown. Time since last message %i. Cooldown remaining %i",
-                    difference,
-                    remaining)
-                do_answer = False
+        if self.is_command_in_cooldown("chatgpt", channel_name):
+            do_answer = False
+            
         if do_answer:
             username = message_author
             if username in self.user_pronouns:
