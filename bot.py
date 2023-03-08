@@ -164,13 +164,19 @@ class Bot(commands.Bot):
             args = ctx.message.content.replace(command, '')
             args = args.split(" ")
             args_count = len(args)
+            error_message = f'You have to specify 2 arguments. Usage: {ctx.prefix}setgcd CommandName Time. For example {ctx.prefix}setgcd chatgpt 20'
             if args_count != 2:
-                await ctx.reply(f'You have to specify 2 arguments. Usage: {ctx.prefix}setgcd CommandName Time. For example {ctx.prefix}setgcd chatgpt 20')
+                await ctx.reply(error_message)
             else:
-                command_name = args[0]
-                cooldown = args[1]
-                self.set_command_global_cd(command_name, ctx.channel.name, cooldown )
-                await ctx.reply(f'Setting global cooldown of command {command_name} to {cooldown}!')
+                try:
+                    command_name = str(args[0])
+                    cooldown = int(args[1])
+                    self.set_command_global_cd(command_name, ctx.channel.name, cooldown)
+                    await ctx.reply(f'Setting global cooldown of command {command_name} to {cooldown}!')
+                except (Exception) as e:  # pylint: disable=broad-except
+                    await ctx.reply(error_message)
+                    log.error("Error while setting global cooldown. Type: %s Args: %s", type(e), args)
+                    log.debug("Stacktrace: %s", e)
 
     @ commands.command()
     async def ping(self, ctx: commands.Context):
