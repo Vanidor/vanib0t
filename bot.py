@@ -90,8 +90,10 @@ class Bot(commands.Bot):
     def is_command_in_cooldown(self, command_name: str, channel_name: str):
         ''' Method to return if a given command is on cooldown in a given channel '''
         old_time = self.get_command_last_used(command_name, channel_name)
+        log.debug("Last used time: %s", old_time)
         if old_time is not None:
             new_time = time.time()
+            log.debug("Now time: %s", old_time)
             if channel_name == self.nick:
                 global_cooldown = 0
             else:
@@ -99,10 +101,14 @@ class Bot(commands.Bot):
             difference = new_time - old_time
             remaining = global_cooldown - difference
 
+            log.info("Global cooldown for %s: %i. Remaining time: %i", command_name, global_cooldown, remaining)
+
             if difference >= global_cooldown:
-                return True
-            else:
+                log.debug("Command no longer on cooldown")
                 return False
+            else:
+                log.debug("Command still on cooldown")
+                return True
         else:
             return False
 
