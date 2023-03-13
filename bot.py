@@ -3,8 +3,10 @@ import logging as log
 import time
 from twitchio.ext import commands
 from twitchio import message as msg
+from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
+from datetime import datetime
 import asyncio
 
 
@@ -111,6 +113,26 @@ class Bot(commands.Bot):
                 return True
         else:
             return False
+
+    @commands.command()
+    async def stream(self, ctx: commands.Context):
+        ''' Get the next stream of the channel the bot is in '''
+        # user = ctx.channel.get_chatter(ctx.channel.name)
+        if ctx.channel.name.casefold() == "Vanidor".casefold():
+            broadcaster_id = "14202186"
+            ical_link = f"https://api.twitch.tv/helix/schedule/icalendar?broadcaster_id={broadcaster_id}"
+            ev = events(ical_link)
+            event = ev[0]
+            now = datetime.now()
+            event_start = event.start
+            now = now.replace(
+                tzinfo=event_start.tzinfo
+            )
+            event_start_readable_date = event_start.strftime("%A, %Y-%m-%d")
+            event_start_readable_time = event_start.strftime("%H:%M")
+            difference = event_start - now
+            result = f"The next stream is going to be on {event_start_readable_date} at {event_start_readable_time} CET in {str(difference)}"
+            await ctx.reply(result)
 
     @commands.command()
     async def chatgpt(self, ctx: commands.Context):
