@@ -6,7 +6,7 @@ from twitchio import message as msg
 from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import asyncio
 
 
@@ -121,17 +121,24 @@ class Bot(commands.Bot):
         if ctx.channel.name.casefold() == "Vanidor".casefold():
             broadcaster_id = "14202186"
             ical_link = f"https://api.twitch.tv/helix/schedule/icalendar?broadcaster_id={broadcaster_id}"
+            log.info("Ical Link: %s", ical_link)
             ev = events(ical_link)
             event = ev[0]
-            now = datetime.now()
-            event_start = event.start
+            now = datetime.now(tz=timezone.utc) + timedelta(hours=1)
             now = now.replace(
-                tzinfo=event_start.tzinfo
+                tzinfo=timezone.utc
             )
-            event_start_readable_date = event_start.strftime("%A, %Y-%m-%d")
-            event_start_readable_time = event_start.strftime("%H:%M")
+            log.info("Now: %s", now)
+            event_start = event.start            
+            event_start = event_start.replace(
+                tzinfo=timezone.utc
+            )
+            log.info("Event Start: %s", event_start)
+            event_start_readable_date_time = event_start.strftime("%A, %Y-%m-%d at %H:%M")
             difference = event_start - now
-            result = f"The next stream is going to be on {event_start_readable_date} at {event_start_readable_time} CET in {str(difference)}"
+            log.info("Difference: %s", difference)
+            difference_text = str(difference)[:-10]
+            result = f"The next stream is going to be on {event_start_readable_date_time} CET in {difference_text}h"
             await ctx.reply(result)
 
     @commands.command()
