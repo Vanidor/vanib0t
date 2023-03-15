@@ -124,21 +124,25 @@ class Bot(commands.Bot):
             log.info("Ical Link: %s", ical_link)
             ev = events(ical_link)
             event = ev[0]
-            now = datetime.now(tz=timezone.utc) + timedelta(hours=1)
-            now = now.replace(
-                tzinfo=timezone.utc
-            )
-            log.info("Now: %s", now)
-            event_start = event.start            
-            event_start = event_start.replace(
-                tzinfo=timezone.utc
-            )
-            log.info("Event Start: %s", event_start)
-            event_start_readable_date_time = event_start.strftime("%A, %Y-%m-%d at %H:%M")
-            difference = event_start - now
-            log.info("Difference: %s", difference)
-            difference_text = str(difference)[:-10]
-            result = f"The next stream is going to be on {event_start_readable_date_time} CET in {difference_text}h"
+            result = ""
+            if event is not None:
+                now = datetime.now(tz=timezone.utc) + timedelta(hours=1)
+                now = now.replace(
+                    tzinfo=timezone.utc
+                )
+                log.info("Now: %s", now)
+                event_start = event.start
+                event_start = event_start.replace(
+                    tzinfo=timezone.utc
+                )
+                log.info("Event Start: %s", event_start)
+                event_start_readable_date_time = event_start.strftime("%A, %Y-%m-%d at %H:%M")
+                difference = event_start - now
+                log.info("Difference: %s", difference)
+                difference_text = str(difference)[:-10]
+                result = f"The next stream is going to be on {event_start_readable_date_time} CET in {difference_text}h."
+            else:
+                result = "There are no streams planned."
             await ctx.reply(result)
 
     @commands.command()
