@@ -122,10 +122,10 @@ class Bot(commands.Bot):
             broadcaster_id = "14202186"
             ical_link = f"https://api.twitch.tv/helix/schedule/icalendar?broadcaster_id={broadcaster_id}"
             log.info("Ical Link: %s", ical_link)
-            ev = events(ical_link)
-            event = ev[0]
+            ev = events(ical_link)            
             result = ""
-            if event is not None:
+            if len(ev) >= 1:
+                event = ev[0]
                 now = datetime.now(tz=timezone.utc) + timedelta(hours=1)
                 now = now.replace(
                     tzinfo=timezone.utc
