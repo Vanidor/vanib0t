@@ -136,11 +136,13 @@ class Bot(commands.Bot):
                     tzinfo=timezone.utc
                 )
                 log.info("Event Start: %s", event_start)
+                game_name = event.categories[0]
+                stream_name = event.summary
                 event_start_readable_date_time = event_start.strftime("%A, %Y-%m-%d at %H:%M")
                 difference = event_start - now
                 log.info("Difference: %s", difference)
                 difference_text = str(difference)[:-10]
-                result = f"The next stream is going to be on {event_start_readable_date_time} CET in {difference_text}h."
+                result = f"The next stream is going to be on {event_start_readable_date_time} CET in {difference_text}h. The game will be \"{game_name}\" and the title of the stream is going to be \"{stream_name}\""
             else:
                 result = "There are no streams planned."
             await ctx.reply(result)
