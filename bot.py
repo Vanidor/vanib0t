@@ -7,7 +7,7 @@ from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
 from datetime import datetime, timezone, timedelta
-import asyncio
+import unicodedata
 
 
 class Bot(commands.Bot):
@@ -114,6 +114,11 @@ class Bot(commands.Bot):
         else:
             return False
 
+
+    def clean_string(self, text: str):
+        cleaned_text = "".join(ch for ch in text if unicodedata.category(ch)[0]!="C")
+        return cleaned_text
+
     @commands.command()
     async def stream(self, ctx: commands.Context):
         ''' Get the next stream of the channel the bot is in '''
@@ -197,16 +202,20 @@ class Bot(commands.Bot):
                 "chatgpt",
                 channel_name
             )
+            answer = self.clean_string(answer)
+            log.info("Cleaned answer: %s", answer)
             if len(answer) < 450:
                 await ctx.reply(answer)
             else:
+                log.info("Answer is too long for one message")
                 result = []
                 for i in range(0, len(answer), 450):
                     result.append(answer[i:i+450])
                 
                 i = 1
+                log.info("Sending answer in %i messages", len(result))
                 for split_string in result:
-                    await ctx.reply(f"({i}/{len(result)})" + split_string)
+                    await ctx.reply(f"({i}/{len(result)}) - " + split_string)
                     i = i + 1
 
     @ commands.command()
