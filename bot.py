@@ -8,6 +8,8 @@ import OpenaiHelper
 import helper_functions
 from datetime import datetime, timezone, timedelta
 import unicodedata
+import time
+
 
 
 class Bot(commands.Bot):
@@ -221,6 +223,7 @@ class Bot(commands.Bot):
                 log.info("Sending answer in %i messages", len(result))
                 for split_string in result:
                     await ctx.reply(f"({i}/{len(result)}) - " + split_string)
+                    time.sleep(0.5)
                     i = i + 1
 
     @ commands.command()
