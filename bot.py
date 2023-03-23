@@ -116,8 +116,13 @@ class Bot(commands.Bot):
 
 
     def clean_string(self, text: str):
-        cleaned_text = "".join(ch for ch in text if unicodedata.category(ch)[0]!="C")
-        return cleaned_text
+        filtered_text = ""
+        for ch in text:
+            if unicodedata.category(ch)[0] != "C":
+                filtered_text += ch
+            else:
+                filtered_text += " "
+        return filtered_text
 
     @commands.command()
     async def stream(self, ctx: commands.Context):
