@@ -197,7 +197,17 @@ class Bot(commands.Bot):
                 "chatgpt",
                 channel_name
             )
-            await ctx.reply(answer)
+            if len(answer) < 450:
+                await ctx.reply(answer)
+            else:
+                result = []
+                for i in range(0, len(answer), 450):
+                    result.append(answer[i:i+450])
+                
+                i = 1
+                for split_string in result:
+                    await ctx.reply(f"({i}/{len(result)})" + split_string)
+                    i = i + 1
 
     @ commands.command()
     async def setgcd(self, ctx: commands.Context):
