@@ -9,7 +9,7 @@ import helper_functions
 from datetime import datetime, timezone, timedelta
 import unicodedata
 import time
-
+import random
 
 
 class Bot(commands.Bot):
@@ -125,6 +125,36 @@ class Bot(commands.Bot):
             else:
                 filtered_text += " "
         return filtered_text
+
+    @commands.command()
+    async def fishh(self, ctx: commands.Context):
+        channel_name = ctx.channel.name
+        message_author = ctx.author.name
+        message_tags = ctx.message.tags
+        if channel_name.casefold() == "vanidor".casefold():
+
+            options = {
+                "👢": 0.5,
+                "AREYOUAFISH": 0.5,
+                "BLAHAJ": 0.4,
+                "SandBag": 0.4,
+                "frogSpin": 0.4,
+                "cisco": 0.3,
+                "JoelW": 0.2,
+                "fishJAM": 0.2,
+                "Flower": 0.2,
+                "AAUGH": 0.1,
+                "PatrickCough": 0.1,
+                "BOP": 0.1,
+                "OOOOBANG": 0.05
+            }
+
+            total_weight = sum(options.values())
+            weights = [w/total_weight for w in options.values()]
+
+            result = random.choices(list(options.keys()), weights=weights)[0]
+
+            await ctx.reply(f"{message_author} caught a {result}")
 
     @commands.command()
     async def stream(self, ctx: commands.Context):
