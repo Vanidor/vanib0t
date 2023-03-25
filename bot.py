@@ -61,6 +61,9 @@ class Bot(commands.Bot):
                      message.author.display_name)
             message.content = f"?chatgpt {message.content}"
 
+        if (message.content.casefold().startswith("fishh")):
+            message.content = "?fishh"
+
         await self.handle_commands(message)
 
     def get_command_last_used(self, command_name: str, channel_name: str):
