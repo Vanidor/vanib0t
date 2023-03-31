@@ -10,6 +10,7 @@ from datetime import datetime, timezone, timedelta
 import unicodedata
 import time
 import random
+import json
 
 
 class Bot(commands.Bot):
@@ -21,6 +22,10 @@ class Bot(commands.Bot):
         self.command_last_used = dict()
         self.command_global_cd = dict()
         self.user_pronouns = dict()
+        self.fishh_odds = {}
+        with open("./fishh.json", "r", encoding="UTF-8") as odds:
+            self.fishh_odds = json.load(odds)
+
         super().__init__(
             token=token,
             prefix=prefix,
@@ -86,7 +91,7 @@ class Bot(commands.Bot):
 
     def set_command_global_cd(self, command_name: str, channel_name: str, cooldown_time: int):
         gcd_name = command_name + "-" + channel_name
-        self.command_global_cd[gcd_name] = cooldown_time     
+        self.command_global_cd[gcd_name] = cooldown_time
 
     def is_message_thread(self, tags):
         if "reply-parent-display-name" in tags:
@@ -104,11 +109,13 @@ class Bot(commands.Bot):
             if channel_name == self.nick:
                 global_cooldown = 0
             else:
-                global_cooldown = self.get_command_global_cd(command_name, channel_name)
+                global_cooldown = self.get_command_global_cd(
+                    command_name, channel_name)
             difference = new_time - old_time
             remaining = global_cooldown - difference
 
-            log.info("Global cooldown for %s: %i. Remaining time: %i", command_name, global_cooldown, remaining)
+            log.info("Global cooldown for %s: %i. Remaining time: %i",
+                     command_name, global_cooldown, remaining)
 
             if difference >= global_cooldown:
                 log.debug("Command no longer on cooldown")
@@ -118,7 +125,6 @@ class Bot(commands.Bot):
                 return True
         else:
             return False
-
 
     def clean_string(self, text: str):
         filtered_text = ""
@@ -136,26 +142,11 @@ class Bot(commands.Bot):
         message_tags = ctx.message.tags
         if channel_name.casefold() == "vanidor".casefold():
 
-            options = {
-                "👢": 0.5,
-                "AREYOUAFISH": 0.5,
-                "BLAHAJ": 0.4,
-                "SandBag": 0.4,
-                "frogSpin": 0.4,
-                "cisco": 0.3,
-                "JoelW": 0.2,
-                "fishJAM": 0.2,
-                "Flower": 0.2,
-                "AAUGH": 0.1,
-                "PatrickCough": 0.1,
-                "BOP": 0.1,
-                "OOOOBANG": 0.05
-            }
+            total_weight = sum(self.fishh_odds.values())
+            weights = [w/total_weight for w in self.fishh_odds.values()]
 
-            total_weight = sum(options.values())
-            weights = [w/total_weight for w in options.values()]
-
-            result = random.choices(list(options.keys()), weights=weights)[0]
+            result = random.choices(
+                list(self.fishh_odds.keys()), weights=weights)[0]
 
             await ctx.reply(f"{message_author} caught a {result}")
 
@@ -167,7 +158,7 @@ class Bot(commands.Bot):
             broadcaster_id = "14202186"
             ical_link = f"https://api.twitch.tv/helix/schedule/icalendar?broadcaster_id={broadcaster_id}"
             log.info("Ical Link: %s", ical_link)
-            ev = events(ical_link)            
+            ev = events(ical_link)
             result = ""
             if len(ev) >= 1:
                 event = ev[0]
@@ -183,7 +174,8 @@ class Bot(commands.Bot):
                 log.info("Event Start: %s", event_start)
                 game_name = event.categories[0]
                 stream_name = event.summary
-                event_start_readable_date_time = event_start.strftime("%A, %Y-%m-%d at %H:%M")
+                event_start_readable_date_time = event_start.strftime(
+                    "%A, %Y-%m-%d at %H:%M")
                 difference = event_start - now
                 log.info("Difference: %s", difference)
                 difference_text = str(difference)[:-10]
@@ -202,7 +194,7 @@ class Bot(commands.Bot):
         do_answer = True
         if self.is_command_in_cooldown("chatgpt", channel_name):
             do_answer = False
-            
+
         if do_answer:
             username = message_author
             if username in self.user_pronouns:
@@ -251,7 +243,7 @@ class Bot(commands.Bot):
                 result = []
                 for i in range(0, len(answer), 450):
                     result.append(answer[i:i+450])
-                
+
                 i = 1
                 log.info("Sending answer in %i messages", len(result))
                 for split_string in result:
@@ -274,11 +266,13 @@ class Bot(commands.Bot):
                 try:
                     command_name = str(args[0])
                     cooldown = int(args[1])
-                    self.set_command_global_cd(command_name, ctx.channel.name, cooldown)
+                    self.set_command_global_cd(
+                        command_name, ctx.channel.name, cooldown)
                     await ctx.reply(f'Setting global cooldown of command {command_name} to {cooldown}!')
                 except (Exception) as e:  # pylint: disable=broad-except
                     await ctx.reply(error_message)
-                    log.error("Error while setting global cooldown. Type: %s Args: %s", type(e), args)
+                    log.error(
+                        "Error while setting global cooldown. Type: %s Args: %s", type(e), args)
                     log.debug("Stacktrace: %s", e)
 
     @ commands.command()

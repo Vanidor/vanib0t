@@ -54,7 +54,7 @@ channels = [
 ]
 AdminUsers = [
     "vanidor",
-    "cisco_04"
+    "cisco_04",
 ]
 log.info(
     "Creating bot with token '%s' and prefix '%s' for channel channels '%s'",
