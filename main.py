@@ -29,6 +29,20 @@ parser.add_argument(
     choices=log._nameToLevel.keys()  # pylint: disable=W0212
 )
 
+parser.add_argument(
+    '--admins',
+    required=True,
+    type=str,
+    help="Usernames of the user with admin rights. Comma separated"
+)
+
+parser.add_argument(
+    '--channels',
+    required=True,
+    type=str,
+    help="List of the channels the bot automatically joins at startup. Comma separated"
+)
+
 args = parser.parse_args()
 
 TOKEN = args.token
@@ -48,14 +62,11 @@ console = log.StreamHandler()
 console.setLevel(LOGLEVEL)
 log.getLogger('').addHandler(console)
 
-channels = [
-    "vanidor",
-    "vanib0t"
-]
-AdminUsers = [
-    "vanidor",
-    "cisco_04",
-]
+
+channels = args.channels.split(",")
+
+AdminUsers = args.admins.split(",")
+
 log.info(
     "Creating bot with token '%s' and prefix '%s' for channel channels '%s'",
     TOKEN, PREFIX, channels)
