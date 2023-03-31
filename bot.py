@@ -256,7 +256,7 @@ class Bot(commands.Bot):
                 log.info("Sending answer in %i messages", len(result))
                 for split_string in result:
                     await ctx.reply(f"({i}/{len(result)}) - " + split_string)
-                    time.sleep(0.5)
+                    time.sleep(1)
                     i = i + 1
 
     @ commands.command()
