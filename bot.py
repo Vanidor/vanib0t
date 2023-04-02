@@ -6,11 +6,14 @@ from twitchio import message as msg
 from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
+from TwitchThread import TwitchThread
+from TwitchThreadMessage import TwitchThreadMessage
 from datetime import datetime, timezone, timedelta
 import unicodedata
 import time
 import random
 import json
+import re
 
 
 class Bot(commands.Bot):
@@ -23,6 +26,7 @@ class Bot(commands.Bot):
         self.command_global_cd = dict()
         self.user_pronouns = dict()
         self.fishh_odds = {}
+        self.threads = list()
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
@@ -92,6 +96,14 @@ class Bot(commands.Bot):
     def set_command_global_cd(self, command_name: str, channel_name: str, cooldown_time: int):
         gcd_name = command_name + "-" + channel_name
         self.command_global_cd[gcd_name] = cooldown_time
+
+    def get_echo_message_reply_id(self, raw_data):
+        regex = r"(?<=@reply-parent-msg-id=)\S{8}-\S{4}-\S{4}-\S{4}-\S{12}"
+        match = re.search(regex, raw_data)
+        if match is not None:
+            return match[0]
+        else:
+            return None
 
     def is_message_thread(self, tags):
         if "reply-parent-display-name" in tags:
@@ -190,6 +202,7 @@ class Bot(commands.Bot):
         channel_name = ctx.channel.name
         message_author = ctx.author.name
         message_tags = ctx.message.tags
+        message_id = ctx.message.id
 
         do_answer = True
         if self.is_command_in_cooldown("chatgpt", channel_name):
@@ -250,6 +263,14 @@ class Bot(commands.Bot):
                     await ctx.reply(f"({i}/{len(result)}) - " + split_string)
                     time.sleep(1)
                     i = i + 1
+            thread = TwitchThread(
+                thread_starting_datetime=datetime.now(),
+                thread_starting_message=original_message,
+                thread_author=message_author,
+                thread_starting_message_id=message_id
+            )
+            self.threads.append(thread)
+            print(str(thread))
 
     @ commands.command()
     async def setgcd(self, ctx: commands.Context):
