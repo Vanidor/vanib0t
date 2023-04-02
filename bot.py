@@ -202,6 +202,7 @@ class Bot(commands.Bot):
         channel_name = ctx.channel.name
         message_author = ctx.author.name
         message_tags = ctx.message.tags
+        message_id = ctx.message.id
 
         do_answer = True
         if self.is_command_in_cooldown("chatgpt", channel_name):
