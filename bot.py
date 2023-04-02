@@ -6,6 +6,7 @@ from twitchio import message as msg
 from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
+from TwitchThread import TwitchThread
 from datetime import datetime, timezone, timedelta
 import unicodedata
 import time
@@ -23,6 +24,7 @@ class Bot(commands.Bot):
         self.command_global_cd = dict()
         self.user_pronouns = dict()
         self.fishh_odds = {}
+        self.threads = list[TwitchThread]
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
