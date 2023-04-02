@@ -95,6 +95,14 @@ class Bot(commands.Bot):
         gcd_name = command_name + "-" + channel_name
         self.command_global_cd[gcd_name] = cooldown_time
 
+    def get_echo_message_reply_id(self, raw_data):
+        regex = r"(?<=@reply-parent-msg-id=)\S{8}-\S{4}-\S{4}-\S{4}-\S{12}"
+        match = re.search(regex, raw_data)
+        if match is not None:
+            return match[0]
+        else:
+            return None
+
     def is_message_thread(self, tags):
         if "reply-parent-display-name" in tags:
             return True
