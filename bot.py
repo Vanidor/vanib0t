@@ -263,6 +263,14 @@ class Bot(commands.Bot):
                     await ctx.reply(f"({i}/{len(result)}) - " + split_string)
                     time.sleep(1)
                     i = i + 1
+            thread = TwitchThread(
+                thread_starting_datetime=datetime.now(),
+                thread_starting_message=original_message,
+                thread_author=message_author,
+                thread_starting_message_id=message_id
+            )
+            self.threads.append(thread)
+            print(str(thread))
 
     @ commands.command()
     async def setgcd(self, ctx: commands.Context):
