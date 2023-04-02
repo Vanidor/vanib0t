@@ -7,11 +7,13 @@ from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
 from TwitchThread import TwitchThread
+from TwitchThreadMessage import TwitchThreadMessage
 from datetime import datetime, timezone, timedelta
 import unicodedata
 import time
 import random
 import json
+import re
 
 
 class Bot(commands.Bot):
