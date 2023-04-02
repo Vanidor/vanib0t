@@ -24,7 +24,7 @@ class Bot(commands.Bot):
         self.command_global_cd = dict()
         self.user_pronouns = dict()
         self.fishh_odds = {}
-        self.threads = list[TwitchThread]
+        self.threads = list()
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
