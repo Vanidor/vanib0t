@@ -30,7 +30,7 @@ class OpenaiHelper:
                 temperature=1,
                 top_p=1,
                 n=1,
-                max_tokens=200,
+                max_tokens=100,
                 presence_penalty=0,
                 frequency_penalty=0,
                 user=username
