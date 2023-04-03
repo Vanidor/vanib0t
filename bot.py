@@ -11,6 +11,7 @@ import unicodedata
 import time
 import random
 import json
+import asyncio
 
 
 class Bot(commands.Bot):
@@ -248,7 +249,7 @@ class Bot(commands.Bot):
                 log.info("Sending answer in %i messages", len(result))
                 for split_string in result:
                     await ctx.reply(f"({i}/{len(result)}) - " + split_string)
-                    time.sleep(1)
+                    await asyncio.sleep(1)
                     i = i + 1
 
     @ commands.command()
