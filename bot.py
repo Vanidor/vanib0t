@@ -248,6 +248,7 @@ class Bot(commands.Bot):
                 i = 1
                 log.info("Sending answer in %i messages", len(result))
                 for split_string in result:
+                    log.info("Sending message %i out of %i", i, len(result))
                     await asyncio.sleep(1)
                     await ctx.reply(f"({i}/{len(result)}) - " + split_string)
                     i = i + 1
