@@ -22,6 +22,12 @@ class Database(ABC):
         ''' Delete an existing user '''
 
     @abstractmethod
+    def user_exists(self, user_id) -> bool:
+        ''' Check if an user exists'''
+
+    # -------------------------------------------------
+
+    @abstractmethod
     def create_channel_settings(self, channel_id, channel_name) -> bool:
         ''' Create new channel settings '''
 
@@ -36,3 +42,13 @@ class Database(ABC):
     @abstractmethod
     def delete_channel_settings(self, channel_id) -> bool:
         ''' Delete existing channel settings'''
+
+    @abstractmethod
+    def channel_settings_exists(self, channel_id) -> bool:
+        ''' Check if channel settings exists '''
+
+    # -------------------------------------------------
+
+    @abstractmethod
+    def close_database(self) -> bool:
+        ''' Close existing database connections and write everything '''
