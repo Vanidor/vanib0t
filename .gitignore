@@ -1,3 +1,6 @@
+*.db
+test*.py
+
 .vscode/
 prod.env
 
