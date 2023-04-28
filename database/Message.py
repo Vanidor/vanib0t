@@ -3,7 +3,8 @@ from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from Base import Base
+from database.Base import Base
+
 
 class Message(Base):
     ''' Class representing a twitch chat message '''
