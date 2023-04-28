@@ -52,8 +52,7 @@ class OpenaiHelper:
         except (Exception) as exc:  # pylint: disable=broad-except
             log.error(
                 "Error while contacting moderation API. Type: %s", type(exc))
-            # log.error("Stacktrace: %s", exc)
-            return "Sorry I wasn't able to get an answer to your request Sadge"
+            return "Sorry I wasn't able to get an answer to your request Sadge . Please try again."
         moderation_output = moderation["results"][0]
 
         log.debug('Moderation output: %s', str(moderation_output))
