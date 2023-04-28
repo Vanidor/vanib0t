@@ -4,6 +4,7 @@ import time
 from DatabaseStrategy import Database
 from User import User
 from ChannelSettings import ChannelSettings
+from Message import Message
 
 
 class SqliteDb(Database):
@@ -44,7 +45,7 @@ class SqliteDb(Database):
             channel_id INTEGER NOT NULL,
             message_timestamp NOT NULL,
             message_content TEXT NOT NULL,
-            FOREIGN KEY (channel_id) REFERENCES {self.settings_table_name}(channel_id)            
+            FOREIGN KEY (channel_id) REFERENCES {self.settings_table_name}(channel_id)
             )
             """
 
@@ -146,6 +147,7 @@ class SqliteDb(Database):
             self.db_connection.commit()
         except sqlite3.OperationalError as exc:
             log.info("Couldn't delete user with id %s: %s (%s)", user_id, exc, type(exc))
+    
     # -------------------------------------------------
 
     def create_channel_settings(self, channel_id, channel_name):
@@ -212,6 +214,16 @@ class SqliteDb(Database):
         except sqlite3.OperationalError as exc:
             log.info("Couldn't delete channel settings with id %s: %s (%s)", channel_id, exc, type(exc))
 
+    # -------------------------------------------------
 
-    def close_database(self) -> bool:
+    def create_message(self, user_id, channel_id,message_timestamp, message_content) -> bool:
+        sql_query = f"""
+        INSERT INTO {self.message_table_name} VALUES
+        ({user_id}, {channel_id}, {message_timestamp}, {message_content})"""
         return None
+
+    def read_messages(self, channel_id, top) -> ChannelSettings:
+        return None
+
+    def close_database(self):
+        self.db_connection.close()

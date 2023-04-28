@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from database.User import User
-from database.ChannelSettings import ChannelSettings
+from User import User
+from ChannelSettings import ChannelSettings
 
 
 class Database(ABC):
@@ -46,6 +46,16 @@ class Database(ABC):
     @abstractmethod
     def channel_settings_exists(self, channel_id) -> bool:
         ''' Check if channel settings exists '''
+
+    # -------------------------------------------------
+
+    @abstractmethod
+    def create_message(self, channel_id, channel_name) -> bool:
+        ''' Create new message '''
+
+    @abstractmethod
+    def read_messages(self, channel_id, top) -> ChannelSettings:
+        ''' Reade existing top X messages '''
 
     # -------------------------------------------------
 

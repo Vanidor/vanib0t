@@ -1,33 +1,15 @@
-class ChannelSettings():
+from sqlalchemy import String
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from Base import Base
+
+class ChannelSettings(Base):
     ''' Class representing channel settings '''
-    channel_id: str
-    display_name: str
-    feature_chatgpt: int
-    feature_fishh: str
-    feature_streamschedule: bool
+    __tablename__ = "channel_settings"
 
-    def __init__(self,
-                 channel_id,
-                 display_name,
-                 feature_chatgpt,
-                 feature_fishh,
-                 feature_streamschedule):
-        self.channel_id = channel_id
-        self.display_name = display_name
-        self.feature_chatgpt = feature_chatgpt
-        self.feature_fishh = feature_fishh
-        self.feature_streamschedule = feature_streamschedule
-        self.__scheme_version = "1.0.0.0"
-
-    def __str__(self) -> str:
-        channel_json = {
-            "id": self.channel_id,
-            "display_name": self.display_name,
-            "features": {
-                "chatgpt": self.feature_chatgpt,
-                "fishh": self.feature_fishh,
-                "stream": self.feature_streamschedule
-            },
-            "___scheme_version": self.__scheme_version
-        }
-        return str(channel_json)
+    channel_id: Mapped[int] = mapped_column(primary_key=True)
+    display_name: Mapped[str] = mapped_column(String(length=30))
+    feature_chatgpt: Mapped[bool]
+    feature_fishh: Mapped[bool]
+    feature_streamschedule: Mapped[bool]
