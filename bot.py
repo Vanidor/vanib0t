@@ -8,7 +8,6 @@ import OpenaiHelper
 import helper_functions
 from datetime import datetime, timezone, timedelta
 import unicodedata
-import time
 import random
 import json
 import asyncio
