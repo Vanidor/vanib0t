@@ -28,6 +28,12 @@ parser.add_argument(
     default=log.INFO,
     choices=log._nameToLevel.keys()  # pylint: disable=W0212
 )
+parser.add_argument(
+    '--database_path',
+    required=False,
+    default="settings/bot.sqlite",
+    help="The path where the DB will be saved"
+)
 
 args = parser.parse_args()
 
@@ -35,6 +41,7 @@ TOKEN = args.token
 PREFIX = args.prefix
 LOGLEVEL = args.loglevel
 OPENAI_API_KEY = args.openai_api_key
+DATABASE_PATH = args.database_path
 
 print(f"Token: {TOKEN}\r\nPREFIX: {PREFIX}\r\nLOGLEVEL: {LOGLEVEL}\r\nOPENAI_API_KEY: {OPENAI_API_KEY}")
 
@@ -64,7 +71,8 @@ bot = bot.Bot(
     token=TOKEN,
     prefix=PREFIX,
     channels=channels,
-    openai_api_key=OPENAI_API_KEY
+    openai_api_key=OPENAI_API_KEY,
+    database_path=DATABASE_PATH
 )
 bot.set_admin_users(
     admin_users=AdminUsers

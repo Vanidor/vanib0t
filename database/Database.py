@@ -14,8 +14,9 @@ from database.Message import Message
 class BotDatabase():
     ''' The bots database '''
 
-    def __init__(self) -> None:
-        self.engine = create_engine("sqlite:///test.sqlite", echo=False)
+    def __init__(self, database_path: str) -> None:
+        db_url = f"sqlite://{database_path}"
+        self.engine = create_engine(db_url, echo=False)
         # log.basicConfig(
         #     level=log.info
         # )

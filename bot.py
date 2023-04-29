@@ -17,14 +17,14 @@ from database.Database import BotDatabase
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
 
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
         self.command_last_used = dict()
         self.command_global_cd = dict()
         self.user_pronouns = dict()
         self.fishh_odds = {}
-        self.database = BotDatabase()
+        self.database = BotDatabase(database_path)
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
