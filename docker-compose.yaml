@@ -1,5 +1,24 @@
 services:
   bot:
-    build: .
+    image: index.docker.io/vanidor/vanib0t:main
+    restart: unless-stopped
+    volumes:
+      - ./settings/:/app/settings/
     env_file:
       - prod.env
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/timezone:/etc/timezone:ro
+      - /root/.docker/config.json:/config.json
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_POLL_INTERVAL=30
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
