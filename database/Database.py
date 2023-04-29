@@ -15,7 +15,7 @@ class BotDatabase():
     ''' The bots database '''
 
     def __init__(self, database_path: str) -> None:
-        db_url = f"sqlite://{database_path}"
+        db_url = f"sqlite:///{database_path}"
         self.engine = create_engine(db_url, echo=False)
         # log.basicConfig(
         #     level=log.info
