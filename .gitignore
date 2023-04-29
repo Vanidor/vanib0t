@@ -1,4 +1,6 @@
+settings/
 *.db
+*.sqlite
 test*.py
 
 .vscode/
