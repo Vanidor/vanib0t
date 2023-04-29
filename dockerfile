@@ -4,6 +4,7 @@ ENV LOGLEVEL=INFO
 ENV TOKEN=
 ENV PREFIX="?"
 ENV OPENAI_API_KEY=
+ENV DATABASE_PATH="settings/bot.sqlite"
 
 WORKDIR /app
 
@@ -13,4 +14,4 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-CMD python3 main.py --token=${TOKEN} --prefix=${PREFIX} --openai_api_key=${OPENAI_API_KEY} --loglevel ${LOGLEVEL}
+CMD python3 main.py --token=${TOKEN} --prefix=${PREFIX} --openai_api_key=${OPENAI_API_KEY} --loglevel ${LOGLEVEL} --database_path ${DATABASE_PATH}}

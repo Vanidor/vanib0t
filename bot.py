@@ -1,29 +1,30 @@
 ''' Logging library for logging '''
 import logging as log
 import time
+from datetime import datetime, timezone, timedelta
+import unicodedata
+import random
+import json
+import asyncio
 from twitchio.ext import commands
 from twitchio import message as msg
 from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
-from datetime import datetime, timezone, timedelta
-import unicodedata
-import time
-import random
-import json
-import asyncio
+from database.Database import BotDatabase
 
 
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
 
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
         self.command_last_used = dict()
         self.command_global_cd = dict()
         self.user_pronouns = dict()
         self.fishh_odds = {}
+        self.database = BotDatabase(database_path)
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
@@ -44,6 +45,12 @@ class Bot(commands.Bot):
 
     async def event_channel_joined(self, channel):
         channel_name = channel.name
+        channel_user = await channel.user()
+        channel_id = channel_user.id
+        self.database.create_channel_settings_if_not_exists(
+            channel_id=channel_id,
+            channel_name=channel_name
+        )
         log.info('Joined %s', channel_name)
         self.set_command_global_cd("chatgpt", channel_name, 15)
 
@@ -198,45 +205,40 @@ class Bot(commands.Bot):
 
         if do_answer:
             username = message_author
-            if username in self.user_pronouns:
-                log.info("Got saved pronouns for %s: %s",
-                         username, self.user_pronouns[username])
-                pronouns = self.user_pronouns[username]
-            else:
-                pronouns = helper_functions.get_user_pronoun(username)
-                self.user_pronouns[username] = pronouns
-                log.info("Saved pronouns for %s: %s",
-                         username, self.user_pronouns[username])
 
-            system = f"You are a friendly bot with the name '{self.nick}' in the twitch channel '{channel_name}'. "
-            system += "Create short answers that you could find in a twitch chat. Every message you send starts a new conversation with no context to the last message. "
-            system += f"The prompt has been send by '{username}' "
-            if pronouns is not None:
-                system += f", according to our records the user goes by the pronouns '{pronouns}', "
-            system += "as a mesage in the twitch chat. "
-            system += "You are never allowed to write a prayer or say something about religion in any matter. "
+            channel_user = await ctx.channel.user()
+
+            channel_settings = self.database.read_channel_settings_by_id(
+                channel_user.id)
+            system = channel_settings.chatgpt_prompt
+
+            system = system.format(
+                self.nick,
+                channel_name,
+                username
+            )
 
             if self.is_message_thread(message_tags):
                 # TODO: Add more system context (all messages from the thread for example)
                 return None
 
-            log.info("System message: %s", system)
+            log.debug("System message: %s", system)
             openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
             answer = await openai.get_chat_completion(
                 system,
                 original_message,
                 username)
-            log.info("Answer for chatgpt prompt '%s' in '%s' by '%s': '%s'",
-                     original_message,
-                     channel_name,
-                     username,
-                     answer)
+            log.debug("Answer for chatgpt prompt '%s' in '%s' by '%s': '%s'",
+                      original_message,
+                      channel_name,
+                      username,
+                      answer)
             self.set_command_last_used(
                 "chatgpt",
                 channel_name
             )
             answer = self.clean_string(answer)
-            log.info("Cleaned answer: %s", answer)
+            log.debug("Cleaned answer: %s", answer)
             if len(answer) < 450:
                 await ctx.reply(answer)
             else:
