@@ -107,10 +107,11 @@ class Bot(commands.Bot):
         else:
             return False
 
-    def is_command_in_cooldown(self, command_name: str, channel_name: str):
+    def get_command_cooldown(self, command_name: str, channel_name: str):
         ''' Method to return if a given command is on cooldown in a given channel '''
         old_time = self.get_command_last_used(command_name, channel_name)
         log.debug("Last used time: %s", old_time)
+        remaining = 0
         if old_time is not None:
             new_time = time.time()
             log.debug("Now time: %s", old_time)
@@ -127,12 +128,9 @@ class Bot(commands.Bot):
 
             if difference >= global_cooldown:
                 log.debug("Command no longer on cooldown")
-                return False
             else:
                 log.debug("Command still on cooldown")
-                return True
-        else:
-            return False
+        return remaining
 
     def clean_string(self, text: str):
         filtered_text = ""
@@ -200,7 +198,11 @@ class Bot(commands.Bot):
         message_tags = ctx.message.tags
 
         do_answer = True
-        if self.is_command_in_cooldown("chatgpt", channel_name):
+        command_name = "chatgpt"
+        remaining = self.get_command_cooldown(command_name, channel_name)
+        if remaining > 0:
+            reply = f"I'm on cooldown right now. Please try again in {remaining} seconds."
+            await ctx.reply(reply)
             do_answer = False
 
         if do_answer:
