@@ -130,8 +130,7 @@ class Bot(commands.Bot):
                 log.debug("Command no longer on cooldown")
             else:
                 log.debug("Command still on cooldown")
-        else:
-            return remaining
+        return remaining
 
     def clean_string(self, text: str):
         filtered_text = ""
