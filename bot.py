@@ -201,7 +201,7 @@ class Bot(commands.Bot):
         command_name = "chatgpt"
         remaining = self.get_command_cooldown(command_name, channel_name)
         if remaining > 0:
-            reply = f"I'm on cooldown right now. Please try again in {remaining} seconds."
+            reply = f"I'm on cooldown right now. Please try again in {int(remaining)} seconds."
             await ctx.reply(reply)
             do_answer = False
 
