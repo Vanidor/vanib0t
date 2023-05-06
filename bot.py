@@ -214,10 +214,24 @@ class Bot(commands.Bot):
                 channel_user.id)
             system = channel_settings.chatgpt_prompt
 
+            now = datetime.utcnow()
+
+            channel = await self.fetch_channel(broadcaster=channel_name)
+            
+            game_name = channel.game_name
+            title = channel.title
+
+            current_datetime = now.strftime(
+                "%Y-%m-%d %H:%M:%S UTC%z"
+            )
+
             system = system.format(
-                self.nick,
-                channel_name,
-                username
+                self.nick, # {0}
+                channel_name, # {1}
+                username, # {2}
+                current_datetime, # {3}
+                game_name,# {4}
+                title # {5}
             )
 
             if self.is_message_thread(message_tags):
