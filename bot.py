@@ -159,36 +159,38 @@ class Bot(commands.Bot):
     @commands.command()
     async def stream(self, ctx: commands.Context):
         ''' Get the next stream of the channel the bot is in '''
-        # user = ctx.channel.get_chatter(ctx.channel.name)
-        if ctx.channel.name.casefold() == "Vanidor".casefold():
-            broadcaster_id = "14202186"
-            ical_link = f"https://api.twitch.tv/helix/schedule/icalendar?broadcaster_id={broadcaster_id}"
-            log.info("Ical Link: %s", ical_link)
-            ev = events(ical_link)
-            result = ""
-            if len(ev) >= 1:
-                event = ev[0]
-                now = datetime.now(tz=timezone.utc) + timedelta(hours=1)
-                now = now.replace(
-                    tzinfo=timezone.utc
-                )
-                log.info("Now: %s", now)
-                event_start = event.start
-                event_start = event_start.replace(
-                    tzinfo=timezone.utc
-                )
-                log.info("Event Start: %s", event_start)
-                game_name = event.categories[0]
-                stream_name = event.summary
-                event_start_readable_date_time = event_start.strftime(
-                    "%A, %Y-%m-%d at %H:%M")
-                difference = event_start - now
-                log.info("Difference: %s", difference)
-                difference_text = str(difference)[:-10]
-                result = f"The next stream is going to be on {event_start_readable_date_time} CET in {difference_text}h. The game will be \"{game_name}\" and the title of the stream is going to be \"{stream_name}\""
+        channel_user = await ctx.channel.user()
+
+        try:
+            schedule = await channel_user.fetch_schedule()
+
+            schedule_segment = schedule.segments[0]
+
+            start_time = schedule_segment.start_time
+            end_time = schedule_segment.end_time
+
+            time_format = "%Y-%m-%d at %H:%M %Z"
+
+            start_time_text = start_time.strftime(time_format)
+            end_time_text = end_time.strftime(time_format)
+            
+            reply = f"The next stream is going to be on {start_time_text}. "
+
+            if schedule_segment.category is not None:
+                game_name = schedule_segment.category.name
+                reply = reply + f"The category will be \"{game_name}\". "
             else:
-                result = "There are no streams planned."
-            await ctx.reply(result)
+                reply = reply + "The category has not been chosen yet. "
+
+            if schedule_segment.title != '':
+                stream_name = schedule_segment.title
+                reply = reply + f"The stream title will be \"{stream_name}\". "
+            else:
+                reply = reply + "There is no stream title yet. "
+            
+            await ctx.reply(reply)
+        except:
+            await ctx.reply("There are no streams planned. ")
 
     @commands.command()
     async def chatgpt(self, ctx: commands.Context):
@@ -217,7 +219,7 @@ class Bot(commands.Bot):
             now = datetime.utcnow()
 
             channel = await self.fetch_channel(broadcaster=channel_name)
-            
+
             game_name = channel.game_name
             title = channel.title
 
