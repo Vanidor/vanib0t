@@ -108,9 +108,7 @@ chatgpt_info = chatgpt_info + f"CHATGPT_PRESENCE_PENALTY: \"{CHATGPT_PRESENCE_PE
 chatgpt_info = chatgpt_info + f"CHATGPT_FREQUENCY_PENALTY: \"{CHATGPT_FREQUENCY_PENALTY}\" "
 chatgpt_info = chatgpt_info + f"CHATGPT_MAXIMUM_WORDS: \"{CHATGPT_MAXIMUM_WORDS}\""
 
-
 log.basicConfig(
-    filename='py.log',
     level=LOGLEVEL,
     format=LOGFORMAT
 )
@@ -119,11 +117,6 @@ log.info(general_info)
 log.info("----------")
 log.info(chatgpt_info)
 log.info("----------")
-
-
-console = log.StreamHandler()
-console.setLevel(LOGLEVEL)
-log.getLogger('').addHandler(console)
 
 channels = [
     "vanidor",
