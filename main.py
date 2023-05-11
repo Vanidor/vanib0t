@@ -97,7 +97,7 @@ general_info = "general info: "
 general_info = general_info + f"Token: \"{TOKEN}\" "
 general_info = general_info + f"PREFIX: \"{PREFIX}\" "
 general_info = general_info + f"LOGLEVEL: \"{LOGLEVEL}\" "
-general_info = general_info * f"OPENAI_API_KEY: \"{OPENAI_API_KEY}\""
+general_info = general_info + f"OPENAI_API_KEY: \"{OPENAI_API_KEY}\""
 
 chatgpt_info = "chatgpt info: "
 chatgpt_info = chatgpt_info + f"CHATGPT_MAX_TOKENS: \"{CHATGPT_MAX_TOKENS}\" "
