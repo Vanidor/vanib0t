@@ -17,9 +17,17 @@ from database.Database import BotDatabase
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
 
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
+
+        self.chatgpt_max_tokens = max_tokens
+        self.chatgpt_temperature = temperature
+        self.chatgpt_n = n
+        self.chatgpt_top_p = top_p
+        self.chatgpt_presence_penalty = presence_penalty
+        self.chatgpt_frequency_penalty = frequency_penalty
+
         self.command_last_used = dict()
         self.command_global_cd = dict()
         self.user_pronouns = dict()
@@ -241,7 +249,15 @@ class Bot(commands.Bot):
                 return None
 
             log.debug("System message: %s", system)
-            openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
+            openai = OpenaiHelper.OpenaiHelper(
+                api_key=self.openai_api_key,
+                max_tokens=self.chatgpt_max_tokens,
+                temperature=self.chatgpt_temperature,
+                n=self.chatgpt_n,
+                top_p=self.chatgpt_top_p,
+                presence_penalty=self.chatgpt_presence_penalty,
+                frequency_penalty=self.chatgpt_frequency_penalty
+                )
             answer = await openai.get_chat_completion(
                 system,
                 original_message,

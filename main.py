@@ -34,6 +34,42 @@ parser.add_argument(
     default="settings/bot.sqlite",
     help="The path where the DB will be saved"
 )
+parser.add_argument(
+    '--chatgpt_max_tokens',
+    required=False,
+    default=60,
+    help="The maximum amount of tokens for chatgpt"
+)
+parser.add_argument(
+    '--chatgpt_temperature',
+    required=False,
+    default=1,
+    help="The temperature for chatgpt"
+)
+parser.add_argument(
+    '--chatgpt_n',
+    required=False,
+    default=1,
+    help="The n value for chatgpt"
+)
+parser.add_argument(
+    '--chatgpt_top_p',
+    required=False,
+    default=1,
+    help="The top p value for chatgpt"
+)
+parser.add_argument(
+    '--chatgpt_presence_penalty',
+    required=False,
+    default=0,
+    help="The presence penalty for chatgpt"
+)
+parser.add_argument(
+    '--chatgpt_frequency_penalty',
+    required=False,
+    default=0,
+    help="The frequency penalty for chatgpt"
+)
 
 args = parser.parse_args()
 
@@ -43,7 +79,24 @@ LOGLEVEL = args.loglevel
 OPENAI_API_KEY = args.openai_api_key
 DATABASE_PATH = args.database_path
 
+CHATGPT_MAX_TOKENS = args.chatgpt_max_tokens
+CHATGPT_TEMPERATURE = args.chatgpt_temperature
+CHATGPT_N = args.chatgpt_n
+CHATGPT_TOP_P = args.chatgpt_top_p
+CHATGPT_PRESENCE_PENALTY = args.chatgpt_presence_penalty
+CHATGPT_FREQUENCY_PENALTY = args.chatgpt_frequency_penalty
+
+chatgpt_info = "chatgpt info:\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_MAX_TOKENS: {CHATGPT_MAX_TOKENS}\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_TEMPERATURE: {CHATGPT_TEMPERATURE}\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_N: {CHATGPT_N}\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_TOP_P: {CHATGPT_TOP_P}\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_PRESENCE_PENALTY: {CHATGPT_PRESENCE_PENALTY}\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_FREQUENCY_PENALTY: {CHATGPT_FREQUENCY_PENALTY}\r\n"
+
 print(f"Token: {TOKEN}\r\nPREFIX: {PREFIX}\r\nLOGLEVEL: {LOGLEVEL}\r\nOPENAI_API_KEY: {OPENAI_API_KEY}")
+print("----------")
+print(chatgpt_info)
 
 log.basicConfig(
     filename='py.log',
@@ -72,7 +125,13 @@ bot = bot.Bot(
     prefix=PREFIX,
     channels=channels,
     openai_api_key=OPENAI_API_KEY,
-    database_path=DATABASE_PATH
+    database_path=DATABASE_PATH,
+    max_tokens=CHATGPT_MAX_TOKENS,
+    temperature=CHATGPT_TEMPERATURE,
+    n=CHATGPT_N,
+    top_p=CHATGPT_TOP_P,
+    presence_penalty=CHATGPT_PRESENCE_PENALTY,
+    frequency_penalty=CHATGPT_FREQUENCY_PENALTY
 )
 bot.set_admin_users(
     admin_users=AdminUsers
