@@ -23,7 +23,7 @@ class Bot(commands.Bot):
 
         self.chatgpt_max_tokens = int(max_tokens)
         self.chatgpt_temperature = float(temperature)
-        self.chatgpt_n = float(n)
+        self.chatgpt_n = int(n)
         self.chatgpt_top_p = float(top_p)
         self.chatgpt_presence_penalty = float(presence_penalty)
         self.chatgpt_frequency_penalty = float(frequency_penalty)
