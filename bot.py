@@ -17,7 +17,7 @@ from database.Database import BotDatabase
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
 
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
 
@@ -27,6 +27,7 @@ class Bot(commands.Bot):
         self.chatgpt_top_p = float(top_p)
         self.chatgpt_presence_penalty = float(presence_penalty)
         self.chatgpt_frequency_penalty = float(frequency_penalty)
+        self.max_words = int(max_words)
 
         self.command_last_used = dict()
         self.command_global_cd = dict()
@@ -256,7 +257,8 @@ class Bot(commands.Bot):
                 n=self.chatgpt_n,
                 top_p=self.chatgpt_top_p,
                 presence_penalty=self.chatgpt_presence_penalty,
-                frequency_penalty=self.chatgpt_frequency_penalty
+                frequency_penalty=self.chatgpt_frequency_penalty,
+                max_words=self.max_words
                 )
             answer = await openai.get_chat_completion(
                 system,

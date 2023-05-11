@@ -70,6 +70,12 @@ parser.add_argument(
     default=0,
     help="The frequency penalty for chatgpt"
 )
+parser.add_argument(
+    '--chatgpt_maximum_words',
+    required=False,
+    default=30,
+    help="The maximum words for chatgpt"
+)
 
 args = parser.parse_args()
 
@@ -85,6 +91,7 @@ CHATGPT_N = args.chatgpt_n
 CHATGPT_TOP_P = args.chatgpt_top_p
 CHATGPT_PRESENCE_PENALTY = args.chatgpt_presence_penalty
 CHATGPT_FREQUENCY_PENALTY = args.chatgpt_frequency_penalty
+CHATGPT_MAXIMUM_WORDS = args.chatgpt_maximum_words
 
 chatgpt_info = "chatgpt info:\r\n"
 chatgpt_info = chatgpt_info + f"CHATGPT_MAX_TOKENS: {CHATGPT_MAX_TOKENS}\r\n"
@@ -93,6 +100,7 @@ chatgpt_info = chatgpt_info + f"CHATGPT_N: {CHATGPT_N}\r\n"
 chatgpt_info = chatgpt_info + f"CHATGPT_TOP_P: {CHATGPT_TOP_P}\r\n"
 chatgpt_info = chatgpt_info + f"CHATGPT_PRESENCE_PENALTY: {CHATGPT_PRESENCE_PENALTY}\r\n"
 chatgpt_info = chatgpt_info + f"CHATGPT_FREQUENCY_PENALTY: {CHATGPT_FREQUENCY_PENALTY}\r\n"
+chatgpt_info = chatgpt_info + f"CHATGPT_MAXIMUM_WORDS: {CHATGPT_MAXIMUM_WORDS}\r\n"
 
 print(f"Token: {TOKEN}\r\nPREFIX: {PREFIX}\r\nLOGLEVEL: {LOGLEVEL}\r\nOPENAI_API_KEY: {OPENAI_API_KEY}")
 print("----------")
@@ -131,7 +139,8 @@ bot = bot.Bot(
     n=CHATGPT_N,
     top_p=CHATGPT_TOP_P,
     presence_penalty=CHATGPT_PRESENCE_PENALTY,
-    frequency_penalty=CHATGPT_FREQUENCY_PENALTY
+    frequency_penalty=CHATGPT_FREQUENCY_PENALTY,
+    max_words=CHATGPT_MAXIMUM_WORDS
 )
 bot.set_admin_users(
     admin_users=AdminUsers
