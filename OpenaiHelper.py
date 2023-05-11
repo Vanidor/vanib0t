@@ -6,19 +6,21 @@ import asyncio
 class OpenaiHelper:
     ''' Openai helper class '''
 
-    def __init__(self, api_key: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int):
+    def __init__(self, api_key: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.n = n
         self.top_p = top_p
         self.presence_penalty = presence_penalty
         self.frequency_penalty = frequency_penalty
+        self.max_words = max_words
         self.api_key = api_key
 
     async def get_chat_completion(self, system: str, user: str, username: str):
         ''' Get chat completion - https://platform.openai.com/docs/guides/chat/introduction '''
         openai.api_key = self.api_key
         log.debug("System: %s", system)
+        user = user + f". Use {self.max_words} words or less."
         log.debug("User: %s", user)
         try:
             completion = await openai.ChatCompletion.acreate(

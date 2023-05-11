@@ -70,6 +70,12 @@ parser.add_argument(
     default=0,
     help="The frequency penalty for chatgpt"
 )
+parser.add_argument(
+    '--chatgpt_maximum_words',
+    required=False,
+    default=30,
+    help="The maximum words for chatgpt"
+)
 
 args = parser.parse_args()
 
@@ -85,28 +91,32 @@ CHATGPT_N = args.chatgpt_n
 CHATGPT_TOP_P = args.chatgpt_top_p
 CHATGPT_PRESENCE_PENALTY = args.chatgpt_presence_penalty
 CHATGPT_FREQUENCY_PENALTY = args.chatgpt_frequency_penalty
+CHATGPT_MAXIMUM_WORDS = args.chatgpt_maximum_words
 
-chatgpt_info = "chatgpt info:\r\n"
-chatgpt_info = chatgpt_info + f"CHATGPT_MAX_TOKENS: {CHATGPT_MAX_TOKENS}\r\n"
-chatgpt_info = chatgpt_info + f"CHATGPT_TEMPERATURE: {CHATGPT_TEMPERATURE}\r\n"
-chatgpt_info = chatgpt_info + f"CHATGPT_N: {CHATGPT_N}\r\n"
-chatgpt_info = chatgpt_info + f"CHATGPT_TOP_P: {CHATGPT_TOP_P}\r\n"
-chatgpt_info = chatgpt_info + f"CHATGPT_PRESENCE_PENALTY: {CHATGPT_PRESENCE_PENALTY}\r\n"
-chatgpt_info = chatgpt_info + f"CHATGPT_FREQUENCY_PENALTY: {CHATGPT_FREQUENCY_PENALTY}\r\n"
+general_info = "general info: "
+general_info = general_info + f"Token: \"{TOKEN}\" "
+general_info = general_info + f"PREFIX: \"{PREFIX}\" "
+general_info = general_info + f"LOGLEVEL: \"{LOGLEVEL}\" "
+general_info = general_info + f"OPENAI_API_KEY: \"{OPENAI_API_KEY}\""
 
-print(f"Token: {TOKEN}\r\nPREFIX: {PREFIX}\r\nLOGLEVEL: {LOGLEVEL}\r\nOPENAI_API_KEY: {OPENAI_API_KEY}")
-print("----------")
-print(chatgpt_info)
+chatgpt_info = "chatgpt info: "
+chatgpt_info = chatgpt_info + f"CHATGPT_MAX_TOKENS: \"{CHATGPT_MAX_TOKENS}\" "
+chatgpt_info = chatgpt_info + f"CHATGPT_TEMPERATURE: \"{CHATGPT_TEMPERATURE}\" "
+chatgpt_info = chatgpt_info + f"CHATGPT_N: \"{CHATGPT_N}\" "
+chatgpt_info = chatgpt_info + f"CHATGPT_TOP_P: \"{CHATGPT_TOP_P}\" "
+chatgpt_info = chatgpt_info + f"CHATGPT_PRESENCE_PENALTY: \"{CHATGPT_PRESENCE_PENALTY}\" "
+chatgpt_info = chatgpt_info + f"CHATGPT_FREQUENCY_PENALTY: \"{CHATGPT_FREQUENCY_PENALTY}\" "
+chatgpt_info = chatgpt_info + f"CHATGPT_MAXIMUM_WORDS: \"{CHATGPT_MAXIMUM_WORDS}\""
 
 log.basicConfig(
-    filename='py.log',
     level=LOGLEVEL,
     format=LOGFORMAT
 )
 
-console = log.StreamHandler()
-console.setLevel(LOGLEVEL)
-log.getLogger('').addHandler(console)
+log.info(general_info)
+log.info("----------")
+log.info(chatgpt_info)
+log.info("----------")
 
 channels = [
     "vanidor",
@@ -131,7 +141,8 @@ bot = bot.Bot(
     n=CHATGPT_N,
     top_p=CHATGPT_TOP_P,
     presence_penalty=CHATGPT_PRESENCE_PENALTY,
-    frequency_penalty=CHATGPT_FREQUENCY_PENALTY
+    frequency_penalty=CHATGPT_FREQUENCY_PENALTY,
+    max_words=CHATGPT_MAXIMUM_WORDS
 )
 bot.set_admin_users(
     admin_users=AdminUsers
