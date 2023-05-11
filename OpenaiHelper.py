@@ -6,7 +6,13 @@ import asyncio
 class OpenaiHelper:
     ''' Openai helper class '''
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int):
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.n = n
+        self.top_p = top_p
+        self.presence_penalty = presence_penalty
+        self.frequency_penalty = frequency_penalty
         self.api_key = api_key
 
     async def get_chat_completion(self, system: str, user: str, username: str):
@@ -27,12 +33,12 @@ class OpenaiHelper:
                         "content": user
                     }
                 ],
-                temperature=1,
-                top_p=1,
-                n=1,
-                max_tokens=60,
-                presence_penalty=0,
-                frequency_penalty=0,
+                temperature=self.temperature,
+                top_p=self.top_p,
+                n=self.n,
+                max_tokens=self.max_tokens,
+                presence_penalty=self.presence_penalty,
+                frequency_penalty=self.frequency_penalty,
                 user=username
             )
         except (Exception) as exc:  # pylint: disable=broad-except
