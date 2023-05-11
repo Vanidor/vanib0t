@@ -17,7 +17,7 @@ from database.Database import BotDatabase
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
 
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
 
@@ -182,7 +182,7 @@ class Bot(commands.Bot):
 
             start_time_text = start_time.strftime(time_format)
             end_time_text = end_time.strftime(time_format)
-            
+
             reply = f"The next stream is going to be on {start_time_text}. "
 
             if schedule_segment.category is not None:
@@ -196,7 +196,7 @@ class Bot(commands.Bot):
                 reply = reply + f"The stream title will be \"{stream_name}\". "
             else:
                 reply = reply + "There is no stream title yet. "
-            
+
             await ctx.reply(reply)
         except:
             await ctx.reply("There are no streams planned. ")
@@ -237,12 +237,12 @@ class Bot(commands.Bot):
             )
 
             system = system.format(
-                self.nick, # {0}
-                channel_name, # {1}
-                username, # {2}
-                current_datetime, # {3}
-                game_name,# {4}
-                title # {5}
+                self.nick,  # {0}
+                channel_name,  # {1}
+                username,  # {2}
+                current_datetime,  # {3}
+                game_name,  # {4}
+                title  # {5}
             )
 
             if self.is_message_thread(message_tags):
@@ -259,7 +259,7 @@ class Bot(commands.Bot):
                 presence_penalty=self.chatgpt_presence_penalty,
                 frequency_penalty=self.chatgpt_frequency_penalty,
                 max_words=self.max_words
-                )
+            )
             answer = await openai.get_chat_completion(
                 system,
                 original_message,
@@ -280,16 +280,26 @@ class Bot(commands.Bot):
             else:
                 log.info("Answer is too long for one message")
                 result = []
-                for i in range(0, len(answer), 450):
-                    result.append(answer[i:i+450])
+                words = answer.split()
+                length = 0
+                res = ""
+                for index, word in enumerate(words):
+                    if length+len(word)+1 <= 450 and index != len(words)-1:
+                        length += len(word)+1
+                        res += f" {word}"
+                    else:
+                        if index == len(words)-1:
+                            res += f" {words[-1]}"
+                        result.append(res)
+                        length = len(word)
+                        res = word
 
-                i = 1
                 log.info("Sending answer in %i messages", len(result))
-                for split_string in result:
-                    log.info("Sending message %i out of %i", i, len(result))
+                for index, message in enumerate(result):
+                    log.info("Sending message %i out of %i",
+                             index, len(result))
                     await asyncio.sleep(1)
-                    await ctx.reply(f"({i}/{len(result)}) - " + split_string)
-                    i = i + 1
+                    await ctx.reply(f"({index}/{len(result)}) - {message}")
 
     @ commands.command()
     async def setgcd(self, ctx: commands.Context):
