@@ -21,12 +21,12 @@ class Bot(commands.Bot):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
 
-        self.chatgpt_max_tokens = max_tokens
-        self.chatgpt_temperature = temperature
-        self.chatgpt_n = n
-        self.chatgpt_top_p = top_p
-        self.chatgpt_presence_penalty = presence_penalty
-        self.chatgpt_frequency_penalty = frequency_penalty
+        self.chatgpt_max_tokens = int(max_tokens)
+        self.chatgpt_temperature = float(temperature)
+        self.chatgpt_n = float(n)
+        self.chatgpt_top_p = float(top_p)
+        self.chatgpt_presence_penalty = float(presence_penalty)
+        self.chatgpt_frequency_penalty = float(frequency_penalty)
 
         self.command_last_used = dict()
         self.command_global_cd = dict()
