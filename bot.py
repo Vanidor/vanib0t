@@ -151,6 +151,18 @@ class Bot(commands.Bot):
         return filtered_text
 
     @commands.command()
+    async def genimage(self, ctx: commands.Context):
+        prompt = ctx.message.content[8:]
+        log.info("Prompt: %s", prompt)
+        message_author = ctx.author.name
+        if(message_author in self.admin_users):
+            openai = OpenaiHelper.OpenaiHelper(self.openai_api_key)
+            image_url = await openai.get_image(prompt)
+            log.info("image_url: %s", image_url)
+            await ctx.reply(f"Your generated image: {image_url}")
+            
+
+    @commands.command()
     async def fishh(self, ctx: commands.Context):
         channel_name = ctx.channel.name
         message_author = ctx.author.name
@@ -220,6 +232,8 @@ class Bot(commands.Bot):
             username = message_author
 
             channel_user = await ctx.channel.user()
+
+            channel_user.fetch_schedule()
 
             channel_settings = self.database.read_channel_settings_by_id(
                 channel_user.id)

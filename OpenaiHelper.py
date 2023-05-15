@@ -16,6 +16,17 @@ class OpenaiHelper:
         self.max_words = max_words
         self.api_key = api_key
 
+    async def get_image(self, prompt: str):
+        log.debug("Prompt: %s", prompt)
+        image = openai.Image.create(
+            api_key=self.api_key,
+            prompt=prompt,
+            n=1,
+            size="1024x1024"
+        )
+        image_url = image['data'][0]['url']
+        return image_url
+
     async def get_chat_completion(self, system: str, user: str, username: str):
         ''' Get chat completion - https://platform.openai.com/docs/guides/chat/introduction '''
         openai.api_key = self.api_key
