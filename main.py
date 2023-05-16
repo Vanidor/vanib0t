@@ -34,6 +34,14 @@ parser.add_argument(
     default="settings/bot.sqlite",
     help="The path where the DB will be saved"
 )
+
+parser.add_argument(
+    '--picoshare_url',
+    required=False,
+    default='',
+    help="The URL of picoshare"
+)
+
 parser.add_argument(
     '--chatgpt_max_tokens',
     required=False,
@@ -85,6 +93,8 @@ LOGLEVEL = args.loglevel
 OPENAI_API_KEY = args.openai_api_key
 DATABASE_PATH = args.database_path
 
+PICOSHARE_URL = args.picoshare_url
+
 CHATGPT_MAX_TOKENS = args.chatgpt_max_tokens
 CHATGPT_TEMPERATURE = args.chatgpt_temperature
 CHATGPT_N = args.chatgpt_n
@@ -98,6 +108,7 @@ general_info = general_info + f"Token: \"{TOKEN}\" "
 general_info = general_info + f"PREFIX: \"{PREFIX}\" "
 general_info = general_info + f"LOGLEVEL: \"{LOGLEVEL}\" "
 general_info = general_info + f"OPENAI_API_KEY: \"{OPENAI_API_KEY}\""
+general_info = general_info + f"PICOSHARE_URL: \"{PICOSHARE_URL}\""
 
 chatgpt_info = "chatgpt info: "
 chatgpt_info = chatgpt_info + f"CHATGPT_MAX_TOKENS: \"{CHATGPT_MAX_TOKENS}\" "
@@ -142,7 +153,8 @@ bot = bot.Bot(
     top_p=CHATGPT_TOP_P,
     presence_penalty=CHATGPT_PRESENCE_PENALTY,
     frequency_penalty=CHATGPT_FREQUENCY_PENALTY,
-    max_words=CHATGPT_MAXIMUM_WORDS
+    max_words=CHATGPT_MAXIMUM_WORDS,
+    picoshare_url=PICOSHARE_URL
 )
 bot.set_admin_users(
     admin_users=AdminUsers
