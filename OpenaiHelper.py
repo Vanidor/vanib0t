@@ -22,7 +22,7 @@ class OpenaiHelper:
             api_key=self.api_key,
             prompt=prompt,
             n=1,
-            size="1024x1024"
+            size="256x256"
         )
         image_url = image['data'][0]['url']
         return image_url
