@@ -16,7 +16,7 @@ class OpenaiHelper:
         self.max_words = max_words
         self.api_key = api_key
 
-    async def get_image(self, prompt: str):
+    async def get_image_url(self, prompt: str):
         log.debug("Prompt: %s", prompt)
         image = openai.Image.create(
             api_key=self.api_key,
