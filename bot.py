@@ -12,12 +12,12 @@ from icalevents.icalevents import events
 import OpenaiHelper
 import helper_functions
 from database.Database import BotDatabase
-
+import requests
+from urllib.parse import urlparse
 
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
-
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int, picoshare_url: str):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
 
@@ -28,6 +28,8 @@ class Bot(commands.Bot):
         self.chatgpt_presence_penalty = float(presence_penalty)
         self.chatgpt_frequency_penalty = float(frequency_penalty)
         self.max_words = int(max_words)
+
+        self.picoshare_url = picoshare_url
 
         self.command_last_used = dict()
         self.command_global_cd = dict()
@@ -151,6 +153,45 @@ class Bot(commands.Bot):
         return filtered_text
 
     @commands.command()
+    async def genimage(self, ctx: commands.Context):
+        prompt = ctx.message.content[10:]
+        log.info("Prompt: %s", prompt)
+        message_author = ctx.author.name
+        if(message_author in self.admin_users):
+            openai = OpenaiHelper.OpenaiHelper(
+                                    api_key=self.openai_api_key,
+                                    max_tokens=self.chatgpt_max_tokens,
+                                    temperature=self.chatgpt_temperature,
+                                    n=self.chatgpt_n,
+                                    top_p=self.chatgpt_top_p,
+                                    presence_penalty=self.chatgpt_presence_penalty,
+                                    frequency_penalty=self.chatgpt_frequency_penalty,
+                                    max_words=self.max_words
+                                    )
+            image_url = await openai.get_image_url(prompt)
+            log.info("Generated image url: %s", image_url)
+            payload={}
+            temp_image = requests.get(image_url, 
+                                      allow_redirects=True,
+                                      timeout=5)
+            open('temp.png', 'wb').write(temp_image.content)
+            temp_image_file = [
+                        ('file',('img.png',open('temp.png','rb'),'image/png'))
+                    ]
+            headers = {}
+            response = requests.request("POST", self.picoshare_url, 
+                                        headers=headers, 
+                                        data=payload, 
+                                        files=temp_image_file,
+                                        timeout=5)
+            json_obj = response.json()
+            parsed_url = urlparse(self.picoshare_url)
+            new_url = f"{parsed_url.scheme}://{parsed_url.netloc}/-{json_obj['id']}"
+            log.info("Generated image: new_url")
+            await ctx.reply(f"Your generated image: {new_url}")
+            
+
+    @commands.command()
     async def fishh(self, ctx: commands.Context):
         channel_name = ctx.channel.name
         message_author = ctx.author.name
@@ -220,6 +261,8 @@ class Bot(commands.Bot):
             username = message_author
 
             channel_user = await ctx.channel.user()
+
+            channel_user.fetch_schedule()
 
             channel_settings = self.database.read_channel_settings_by_id(
                 channel_user.id)
