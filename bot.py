@@ -17,9 +17,11 @@ from urllib.parse import urlparse
 
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int, picoshare_url: str):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int, picoshare_url: str, image_dimensions: str):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
+
+        self.dalle_image_dimensions = str(image_dimensions)
 
         self.chatgpt_max_tokens = int(max_tokens)
         self.chatgpt_temperature = float(temperature)
@@ -36,6 +38,8 @@ class Bot(commands.Bot):
         self.user_pronouns = dict()
         self.fishh_odds = {}
         self.database = BotDatabase(database_path)
+
+        
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
@@ -160,6 +164,7 @@ class Bot(commands.Bot):
         if(message_author in self.admin_users):
             openai = OpenaiHelper.OpenaiHelper(
                                     api_key=self.openai_api_key,
+                                    image_dimensions=self.dalle_image_dimensions,
                                     max_tokens=self.chatgpt_max_tokens,
                                     temperature=self.chatgpt_temperature,
                                     n=self.chatgpt_n,
@@ -295,6 +300,7 @@ class Bot(commands.Bot):
             log.debug("System message: %s", system)
             openai = OpenaiHelper.OpenaiHelper(
                 api_key=self.openai_api_key,
+                image_dimensions=self.dalle_image_dimensions,
                 max_tokens=self.chatgpt_max_tokens,
                 temperature=self.chatgpt_temperature,
                 n=self.chatgpt_n,
