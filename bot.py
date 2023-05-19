@@ -100,6 +100,10 @@ class Bot(commands.Bot):
                      message.author.display_name)
             message.content = f"?chatgpt {message.content}"
 
+        reward_id = self.get_tag_value(message.tags, "custom-reward-id")
+        if(reward_id is not None):
+            log.info("Channel point redemption! ID: %s", reward_id)
+
         if (message.content.casefold().startswith("fishh")):
             message.content = "?fishh"
 
@@ -132,6 +136,12 @@ class Bot(commands.Bot):
             return True
         else:
             return False
+
+    def get_tag_value(self, tags, tag_name):
+        if tag_name in tags:
+            return tags[tag_name]
+        else:
+            return None
 
     def get_command_cooldown(self, command_name: str, channel_name: str):
         ''' Method to return if a given command is on cooldown in a given channel '''
