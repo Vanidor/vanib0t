@@ -13,5 +13,6 @@ class ChannelSettings(Base):
     display_name: Mapped[str] = mapped_column(String(length=30))
     chatgpt_prompt: Mapped[str] = mapped_column(String())
     feature_chatgpt: Mapped[bool]
+    feature_genimage: Mapped[bool]
     feature_fishh: Mapped[bool]
     feature_streamschedule: Mapped[bool]

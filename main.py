@@ -84,6 +84,12 @@ parser.add_argument(
     default=30,
     help="The maximum words for chatgpt"
 )
+parser.add_argument(
+    '--dalle_image_dimensions',
+    required=False,
+    default="1024x1024",
+    help="The image dimensions for dalle images"
+)
 
 args = parser.parse_args()
 
@@ -103,6 +109,8 @@ CHATGPT_PRESENCE_PENALTY = args.chatgpt_presence_penalty
 CHATGPT_FREQUENCY_PENALTY = args.chatgpt_frequency_penalty
 CHATGPT_MAXIMUM_WORDS = args.chatgpt_maximum_words
 
+DALLE_IMAGE_DIMENSIONS = args.dalle_image_dimensions
+
 general_info = "general info: "
 general_info = general_info + f"Token: \"{TOKEN}\" "
 general_info = general_info + f"PREFIX: \"{PREFIX}\" "
@@ -119,6 +127,9 @@ chatgpt_info = chatgpt_info + f"CHATGPT_PRESENCE_PENALTY: \"{CHATGPT_PRESENCE_PE
 chatgpt_info = chatgpt_info + f"CHATGPT_FREQUENCY_PENALTY: \"{CHATGPT_FREQUENCY_PENALTY}\" "
 chatgpt_info = chatgpt_info + f"CHATGPT_MAXIMUM_WORDS: \"{CHATGPT_MAXIMUM_WORDS}\""
 
+dalle_info = "dalle_info: "
+dalle_info = dalle_info + f"DALLE_IMAGE_DIMENSIONS: \"{DALLE_IMAGE_DIMENSIONS}\""
+
 log.basicConfig(
     level=LOGLEVEL,
     format=LOGFORMAT
@@ -127,6 +138,8 @@ log.basicConfig(
 log.info(general_info)
 log.info("----------")
 log.info(chatgpt_info)
+log.info("----------")
+log.info(dalle_info)
 log.info("----------")
 
 channels = [
@@ -154,7 +167,8 @@ bot = bot.Bot(
     presence_penalty=CHATGPT_PRESENCE_PENALTY,
     frequency_penalty=CHATGPT_FREQUENCY_PENALTY,
     max_words=CHATGPT_MAXIMUM_WORDS,
-    picoshare_url=PICOSHARE_URL
+    picoshare_url=PICOSHARE_URL,
+    image_dimensions=DALLE_IMAGE_DIMENSIONS
 )
 bot.set_admin_users(
     admin_users=AdminUsers

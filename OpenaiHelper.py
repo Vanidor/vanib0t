@@ -6,7 +6,8 @@ import asyncio
 class OpenaiHelper:
     ''' Openai helper class '''
 
-    def __init__(self, api_key: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
+    def __init__(self, api_key: str, image_dimensions: str, max_tokens: int, temperature: int, n:int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int):
+        self.image_dimensions = image_dimensions
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.n = n
@@ -22,7 +23,7 @@ class OpenaiHelper:
             api_key=self.api_key,
             prompt=prompt,
             n=1,
-            size="256x256"
+            size=self.image_dimensions
         )
         image_url = image['data'][0]['url']
         return image_url

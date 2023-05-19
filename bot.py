@@ -17,9 +17,11 @@ from urllib.parse import urlparse
 
 class Bot(commands.Bot):
     ''' Bot class for the twitch chat bot '''
-    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int, picoshare_url: str):
+    def __init__(self, token: str, prefix: str, channels: list[str], openai_api_key: str, database_path: str, max_tokens: int, temperature: int, n: int, top_p: int, presence_penalty: int, frequency_penalty: int, max_words: int, picoshare_url: str, image_dimensions: str):
         self.admin_users = ""
         self.openai_api_key = openai_api_key
+
+        self.dalle_image_dimensions = str(image_dimensions)
 
         self.chatgpt_max_tokens = int(max_tokens)
         self.chatgpt_temperature = float(temperature)
@@ -36,6 +38,19 @@ class Bot(commands.Bot):
         self.user_pronouns = dict()
         self.fishh_odds = {}
         self.database = BotDatabase(database_path)
+
+        self.openai = OpenaiHelper.OpenaiHelper(
+                api_key=self.openai_api_key,
+                image_dimensions=self.dalle_image_dimensions,
+                max_tokens=self.chatgpt_max_tokens,
+                temperature=self.chatgpt_temperature,
+                n=self.chatgpt_n,
+                top_p=self.chatgpt_top_p,
+                presence_penalty=self.chatgpt_presence_penalty,
+                frequency_penalty=self.chatgpt_frequency_penalty,
+                max_words=self.max_words
+            )
+        
         with open("./fishh.json", "r", encoding="UTF-8") as odds:
             self.fishh_odds = json.load(odds)
 
@@ -157,38 +172,38 @@ class Bot(commands.Bot):
         prompt = ctx.message.content[10:]
         log.info("Prompt: %s", prompt)
         message_author = ctx.author.name
-        if(message_author in self.admin_users):
-            openai = OpenaiHelper.OpenaiHelper(
-                                    api_key=self.openai_api_key,
-                                    max_tokens=self.chatgpt_max_tokens,
-                                    temperature=self.chatgpt_temperature,
-                                    n=self.chatgpt_n,
-                                    top_p=self.chatgpt_top_p,
-                                    presence_penalty=self.chatgpt_presence_penalty,
-                                    frequency_penalty=self.chatgpt_frequency_penalty,
-                                    max_words=self.max_words
-                                    )
-            image_url = await openai.get_image_url(prompt)
-            log.info("Generated image url: %s", image_url)
-            payload={}
-            temp_image = requests.get(image_url, 
-                                      allow_redirects=True,
-                                      timeout=5)
-            open('temp.png', 'wb').write(temp_image.content)
-            temp_image_file = [
-                        ('file',('img.png',open('temp.png','rb'),'image/png'))
-                    ]
-            headers = {}
-            response = requests.request("POST", self.picoshare_url, 
-                                        headers=headers, 
-                                        data=payload, 
-                                        files=temp_image_file,
+        channel_user = await ctx.channel.user()
+        channel_settings = self.database.read_channel_settings_by_id(
+                channel_user.id)
+
+        if((message_author in self.admin_users) and (channel_settings.feature_genimage)):
+            try:
+                image_url = await self.openai.get_image_url(prompt)
+                log.info("Generated image url: %s", image_url)
+                payload={}
+                temp_image = requests.get(image_url, 
+                                        allow_redirects=True,
                                         timeout=5)
-            json_obj = response.json()
-            parsed_url = urlparse(self.picoshare_url)
-            new_url = f"{parsed_url.scheme}://{parsed_url.netloc}/-{json_obj['id']}"
-            log.info("Generated image: new_url")
-            await ctx.reply(f"Your generated image: {new_url}")
+                open('temp.png', 'wb').write(temp_image.content)
+                temp_image_file = [
+                            ('file',('img.png',open('temp.png','rb'),'image/png'))
+                        ]
+                headers = {}
+                
+                response = requests.request("POST", self.picoshare_url, 
+                                                headers=headers, 
+                                                data=payload, 
+                                                files=temp_image_file,
+                                                timeout=5)
+                json_obj = response.json()
+                
+                parsed_url = urlparse(self.picoshare_url)
+                new_url = f"{parsed_url.scheme}://{parsed_url.netloc}/-{json_obj['id']}"
+                log.info(f"Generated image: {new_url}")
+                await ctx.reply(f"Your generated image: {new_url}")
+            except:
+                log.warning("The image could not be generated - is the image share URL working?")
+                await ctx.reply("The image couldn't be generated!")
             
 
     @commands.command()
@@ -196,7 +211,10 @@ class Bot(commands.Bot):
         channel_name = ctx.channel.name
         message_author = ctx.author.name
         message_tags = ctx.message.tags
-        if channel_name.casefold() == "vanidor".casefold():
+        channel_user = await ctx.channel.user()
+        channel_settings = self.database.read_channel_settings_by_id(
+                channel_user.id)
+        if channel_settings.feature_fishh:
 
             total_weight = sum(self.fishh_odds.values())
             weights = [w/total_weight for w in self.fishh_odds.values()]
@@ -210,37 +228,40 @@ class Bot(commands.Bot):
     async def stream(self, ctx: commands.Context):
         ''' Get the next stream of the channel the bot is in '''
         channel_user = await ctx.channel.user()
+        channel_settings = self.database.read_channel_settings_by_id(
+                channel_user.id)
 
-        try:
-            schedule = await channel_user.fetch_schedule()
+        if channel_settings.feature_streamschedule:
+            try:
+                schedule = await channel_user.fetch_schedule()
 
-            schedule_segment = schedule.segments[0]
+                schedule_segment = schedule.segments[0]
 
-            start_time = schedule_segment.start_time
-            end_time = schedule_segment.end_time
+                start_time = schedule_segment.start_time
+                end_time = schedule_segment.end_time
 
-            time_format = "%Y-%m-%d at %H:%M %Z"
+                time_format = "%Y-%m-%d at %H:%M %Z"
 
-            start_time_text = start_time.strftime(time_format)
-            end_time_text = end_time.strftime(time_format)
+                start_time_text = start_time.strftime(time_format)
+                end_time_text = end_time.strftime(time_format)
 
-            reply = f"The next stream is going to be on {start_time_text}. "
+                reply = f"The next stream is going to be on {start_time_text}. "
 
-            if schedule_segment.category is not None:
-                game_name = schedule_segment.category.name
-                reply = reply + f"The category will be \"{game_name}\". "
-            else:
-                reply = reply + "The category has not been chosen yet. "
+                if schedule_segment.category is not None:
+                    game_name = schedule_segment.category.name
+                    reply = reply + f"The category will be \"{game_name}\". "
+                else:
+                    reply = reply + "The category has not been chosen yet. "
 
-            if schedule_segment.title != '':
-                stream_name = schedule_segment.title
-                reply = reply + f"The stream title will be \"{stream_name}\". "
-            else:
-                reply = reply + "There is no stream title yet. "
+                if schedule_segment.title != '':
+                    stream_name = schedule_segment.title
+                    reply = reply + f"The stream title will be \"{stream_name}\". "
+                else:
+                    reply = reply + "There is no stream title yet. "
 
-            await ctx.reply(reply)
-        except:
-            await ctx.reply("There are no streams planned. ")
+                await ctx.reply(reply)
+            except:
+                await ctx.reply("There are no streams planned. ")
 
     @commands.command()
     async def chatgpt(self, ctx: commands.Context):
@@ -248,24 +269,27 @@ class Bot(commands.Bot):
         channel_name = ctx.channel.name
         message_author = ctx.author.name
         message_tags = ctx.message.tags
+        channel_user = await ctx.channel.user()
 
         do_answer = True
         command_name = "chatgpt"
         remaining = self.get_command_cooldown(command_name, channel_name)
+        channel_settings = self.database.read_channel_settings_by_id(
+                channel_user.id)
+        
         if remaining > 0:
             reply = f"I'm on cooldown right now. Please try again in {int(remaining)} seconds."
             await ctx.reply(reply)
             do_answer = False
 
+        if not channel_settings.feature_chatgpt:
+            reply = f"Sorry, this feature is disabled right now."
+            do_answer = False
+            await ctx.reply(reply)
+
         if do_answer:
             username = message_author
 
-            channel_user = await ctx.channel.user()
-
-            channel_user.fetch_schedule()
-
-            channel_settings = self.database.read_channel_settings_by_id(
-                channel_user.id)
             system = channel_settings.chatgpt_prompt
 
             now = datetime.utcnow()
@@ -293,17 +317,7 @@ class Bot(commands.Bot):
                 return None
 
             log.debug("System message: %s", system)
-            openai = OpenaiHelper.OpenaiHelper(
-                api_key=self.openai_api_key,
-                max_tokens=self.chatgpt_max_tokens,
-                temperature=self.chatgpt_temperature,
-                n=self.chatgpt_n,
-                top_p=self.chatgpt_top_p,
-                presence_penalty=self.chatgpt_presence_penalty,
-                frequency_penalty=self.chatgpt_frequency_penalty,
-                max_words=self.max_words
-            )
-            answer = await openai.get_chat_completion(
+            answer = await self.openai.get_chat_completion(
                 system,
                 original_message,
                 username)
