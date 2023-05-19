@@ -1,0 +1,37 @@
+<html>
+    <header>
+        <style>
+            #bot_avatar {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                -webkit-transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%);
+            }
+            #bot_avatar img {
+                width: 8em;
+            }
+        </style>
+        <script>
+            const ws = new WebSocket("ws://localhost:8765", "test")
+
+            ws.onopen = function(OpenEvent) {
+                console.log("Connected to websocket " + ws.protocol + ".")
+            }
+            ws.onmessage = function(MessageEvent) {
+                console.log("Got message: " + MessageEvent.data + ".")
+            }
+            ws.onclose = function(CloseEvent) {
+                console.log("Closed websocket connection.")
+            }
+            ws.onerror = function(ErrorEvent) {
+                console.log("Error in websocket.")
+            }
+        </script>
+    </header>
+    <body>
+        <div id="bot_avatar">
+            <img src="img/default.webp">
+        </div>
+    </body>
+</html>
