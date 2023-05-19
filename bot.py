@@ -177,27 +177,33 @@ class Bot(commands.Bot):
                 channel_user.id)
 
         if((message_author in self.admin_users) and (channel_settings.feature_genimage)):
-            image_url = await self.openai.get_image_url(prompt)
-            log.info("Generated image url: %s", image_url)
-            payload={}
-            temp_image = requests.get(image_url, 
-                                      allow_redirects=True,
-                                      timeout=5)
-            open('temp.png', 'wb').write(temp_image.content)
-            temp_image_file = [
-                        ('file',('img.png',open('temp.png','rb'),'image/png'))
-                    ]
-            headers = {}
-            response = requests.request("POST", self.picoshare_url, 
-                                        headers=headers, 
-                                        data=payload, 
-                                        files=temp_image_file,
+            try:
+                image_url = await self.openai.get_image_url(prompt)
+                log.info("Generated image url: %s", image_url)
+                payload={}
+                temp_image = requests.get(image_url, 
+                                        allow_redirects=True,
                                         timeout=5)
-            json_obj = response.json()
-            parsed_url = urlparse(self.picoshare_url)
-            new_url = f"{parsed_url.scheme}://{parsed_url.netloc}/-{json_obj['id']}"
-            log.info("Generated image: new_url")
-            await ctx.reply(f"Your generated image: {new_url}")
+                open('temp.png', 'wb').write(temp_image.content)
+                temp_image_file = [
+                            ('file',('img.png',open('temp.png','rb'),'image/png'))
+                        ]
+                headers = {}
+                
+                response = requests.request("POST", self.picoshare_url, 
+                                                headers=headers, 
+                                                data=payload, 
+                                                files=temp_image_file,
+                                                timeout=5)
+                json_obj = response.json()
+                
+                parsed_url = urlparse(self.picoshare_url)
+                new_url = f"{parsed_url.scheme}://{parsed_url.netloc}/-{json_obj['id']}"
+                log.info(f"Generated image: {new_url}")
+                await ctx.reply(f"Your generated image: {new_url}")
+            except:
+                log.warning("The image could not be generated - is the image share URL working?")
+                await ctx.reply("The image couldn't be generated!")
             
 
     @commands.command()
