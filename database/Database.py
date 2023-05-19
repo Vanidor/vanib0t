@@ -88,7 +88,8 @@ class BotDatabase():
                 chatgpt_prompt=default_prompt,
                 feature_chatgpt=True,
                 feature_fishh=True,
-                feature_streamschedule=True
+                feature_streamschedule=True,
+                feature_genimage=True
             )
             session = self.__get_session__()
             session.add(new_channel_settings)
