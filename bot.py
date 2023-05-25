@@ -239,9 +239,9 @@ class Bot(commands.Bot):
 
                 start_time = schedule_segment.start_time
                 end_time = schedule_segment.end_time
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
 
-                difference = now - start_time
+                difference = start_time - now
 
                 time_format = "%Y-%m-%d at %H:%M %Z"
 
