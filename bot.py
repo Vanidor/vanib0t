@@ -239,6 +239,9 @@ class Bot(commands.Bot):
 
                 start_time = schedule_segment.start_time
                 end_time = schedule_segment.end_time
+                now = datetime.utcnow()
+
+                difference = now - start_time
 
                 time_format = "%Y-%m-%d at %H:%M %Z"
 
@@ -246,6 +249,7 @@ class Bot(commands.Bot):
                 end_time_text = end_time.strftime(time_format)
 
                 reply = f"The next stream is going to be on {start_time_text}. "
+                reply = reply + f"It will be in {str(difference)}. "
 
                 if schedule_segment.category is not None:
                     game_name = schedule_segment.category.name
