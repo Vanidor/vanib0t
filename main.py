@@ -143,7 +143,6 @@ log.info(dalle_info)
 log.info("----------")
 
 channels = [
-    "vanidor",
     "vanib0t"
 ]
 AdminUsers = [
