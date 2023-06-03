@@ -115,6 +115,15 @@ class BotDatabase():
             result = None
         session.close()
         return result
+    
+    def read_channel_settings(self) -> ChannelSettings:
+        ''' Function to read all channel settings
+            Returns the channels found '''
+        session = self.__get_session__()
+        channel_settings = []
+        for channel_setting in session.query(ChannelSettings).order_by(ChannelSettings.channel_id):
+            channel_settings.append(channel_setting)
+        return channel_settings
 
     def update_channel_settings(self, user: User) -> bool:
         pass

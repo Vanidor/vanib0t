@@ -68,6 +68,10 @@ class Bot(commands.Bot):
         ''' Specifies that the bot is ready '''
         log.info('Logged in as %s', self.nick)
         log.info('User id is %s', self.user_id)
+        channel_settings = self.database.read_channel_settings()
+        for channel_setting in channel_settings:
+            log.info("Joining channel %s", channel_setting.display_name)
+            await self.join_channels(channels=[channel_setting.display_name])
 
     async def event_channel_joined(self, channel):
         channel_name = channel.name
