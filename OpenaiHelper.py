@@ -32,7 +32,8 @@ class OpenaiHelper:
         ''' Get chat completion - https://platform.openai.com/docs/guides/chat/introduction '''
         openai.api_key = self.api_key
         log.debug("System: %s", system)
-        user = user + f". Use {self.max_words} words or less."
+        if(int(self.max_words) >= 0):
+            user = user + f". Use {self.max_words} words or less."
         log.debug("User: %s", user)
         try:
             completion = await openai.ChatCompletion.acreate(
